@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen flex items-center justify-center bg-cover bg-center px-4"
+    class="relative min-h-screen w-full flex items-center justify-center bg-cover bg-center px-4"
     style="
       background-image: url('https://img.freepik.com/vector-premium/educacion-distancia-linea-casa_108855-1365.jpg?w=2000');
     "
@@ -8,9 +8,16 @@
     <!-- Overlay -->
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
 
-    <!-- Login Card -->
+    <button
+      @click="router.push('/')"
+      class="absolute top-6 left-6 z-20 flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/20 px-4 py-2 rounded-xl transition-all duration-300 shadow-lg cursor-pointer"
+    >
+      <i class="pi pi-arrow-left"></i>
+      <span class="text-sm font-medium">Volver</span>
+    </button>
+
     <div
-      class="relative w-full max-w-md bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-2xl p-10"
+      class="z-10 w-full max-w-md bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-2xl p-10"
     >
       <!-- Logo -->
       <div class="flex flex-col items-center mb-8">
@@ -25,25 +32,22 @@
         </div>
 
         <h1 class="text-3xl font-bold text-white mt-5">Bienvenido</h1>
-
         <p class="text-white/70 text-sm mt-2">Inicia sesión para continuar</p>
       </div>
 
       <!-- Form -->
       <form @submit.prevent="handleLogin" class="space-y-5">
-        <!-- Usuario -->
+        <!-- Email -->
         <div>
-          <label class="block text-white text-sm font-medium mb-2"> Usuario </label>
-
+          <label class="block text-white text-sm font-medium mb-2"> Email </label>
           <div
             class="flex items-center bg-white/10 border border-white/20 rounded-xl px-4 py-3 backdrop-blur-md"
           >
             <i class="pi pi-user text-white/70 mr-3"></i>
-
             <input
               v-model="email"
               type="email"
-              placeholder="Ingrese su usuario"
+              placeholder="Ingrese su email"
               class="w-full bg-transparent border-transparent text-white placeholder-white/50 focus:outline-none"
               required
             />
@@ -53,12 +57,10 @@
         <!-- Password -->
         <div>
           <label class="block text-white text-sm font-medium mb-2"> Contraseña </label>
-
           <div
             class="flex items-center bg-white/10 border border-white/20 rounded-xl px-4 py-3 backdrop-blur-md"
           >
             <i class="pi pi-lock text-white/70 mr-3"></i>
-
             <input
               v-model="password"
               type="password"
@@ -78,18 +80,6 @@
           {{ loading ? 'Iniciando...' : 'Iniciar Sesión' }}
         </button>
       </form>
-
-      <!-- Footer -->
-      <p class="text-center text-white/70 text-sm mt-6">
-        ¿No tienes cuenta?
-
-        <button
-          @click="goToRegister"
-          class="text-white font-semibold hover:underline bg-transparent border-0 cursor-pointer"
-        >
-          Registrarse
-        </button>
-      </p>
     </div>
   </div>
 </template>
@@ -135,9 +125,5 @@ const handleLogin = async () => {
   } finally {
     loading.value = false
   }
-}
-
-const goToRegister = () => {
-  router.push({ name: 'register' })
 }
 </script>
