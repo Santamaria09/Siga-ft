@@ -1,97 +1,142 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
-//import axios from "axios";
+import { ref, computed } from "vue";
 
 const emit = defineEmits(["cerrar", "save"]);
 
+// NOTA: Idealmente estos catálogos deben cargarse desde la API 
+// para asegurar que los IDs coincidan con la base de datos.
+const listaDepartamentos = ref([
+  { id: 1, nombre: "Chalatenango" },
+  { id: 2, nombre: "San Salvador" }
+]);
+
+const listaMunicipios = ref({
+  1: [
+    { id: 101, nombre: "Chalatenango Sur" },
+    { id: 102, nombre: "Chalatenango Norte" },
+    { id: 103, nombre: "Chalatenango Centro" }
+  ],
+  2: [
+    { id: 201, nombre: "San Salvador Centro" },
+    { id: 202, nombre: "San Salvador Oeste" }
+  ]
+});
+
+const listaDistritos = ref({
+  102: [
+    { id: 1001, nombre: "Citalá" },
+    { id: 1002, nombre: "La Palma" },
+    { id: 1003, nombre: "San Ignacio" }
+  ],
+  101: [
+    { id: 1004, nombre: "Arcatao" },
+    { id: 1005, nombre: "San José Las Flores" }
+  ]
+});
+
 const estudiante = ref({
   nombres: "",
-  NIE: "",
-  departamentoId: null,
-  municipioId: null,
-  distritoId: null,
-  canton: null,
+  nie: "",
+  departamento_id: null,
+  municipio_id: null,
+  distrito_id: null,
+  canton: "",
   telefono: "",
   correo: "",
   direccion: "",
   genero: ""
 });
 
-const distritos = ref([]);
-const departamentoNombre = ref("");
-const municipioNombre = ref("");
-
-const filtroTexto = ref("");
-const mostrarSugerencias = ref(false);
-
-const distritosFiltrados = computed(() => {
-  if (!filtroTexto.value) return [];
-  return distritos.value.filter(d =>
-    d.nombre.toLowerCase().includes(filtroTexto.value.toLowerCase())
-  );
+const todosLosDistritos = computed(() => {
+  const distritosPlanos = [];
+  for (const idMunicipio in listaDistritos.value) {
+    listaDistritos.value[idMunicipio].forEach(distrito => {
+      distritosPlanos.push({
+        ...distrito,
+        municipioPadreId: parseInt(idMunicipio)
+      });
+    });
+  }
+  return distritosPlanos.sort((a, b) => a.nombre.localeCompare(b.nombre));
 });
 
-onMounted(async () => {
-  await cargarDistritos();
-});
+const alCambiarDistrito = () => {
+  const idDistritoSeleccionado = estudiante.value.distrito_id;
+  
+  if (!idDistritoSeleccionado) {
+    estudiante.value.municipio_id = null;
+    estudiante.value.departamento_id = null;
+    return;
+  }
 
-const cargarDistritos = async () => {
-  try {
-    const { data } = await axios.get("/api/distritos");
-    distritos.value = data;
-  } catch (error) {
-    console.error(error);
+  const distritoEncontrado = todosLosDistritos.value.find(d => d.id === idDistritoSeleccionado);
+  
+  if (distritoEncontrado) {
+    estudiante.value.municipio_id = distritoEncontrado.municipioPadreId;
+
+    for (const idDepto in listaMunicipios.value) {
+      const perteneceAlDepto = listaMunicipios.value[idDepto].some(
+        m => m.id === distritoEncontrado.municipioPadreId
+      );
+      
+      if (perteneceAlDepto) {
+        estudiante.value.departamento_id = parseInt(idDepto);
+        break;
+      }
+    }
   }
 };
 
-const seleccionarDistrito = async (distrito) => {
-  filtroTexto.value = distrito.nombre;
-  estudiante.value.distritoId = distrito.id;
-  mostrarSugerencias.value = false;
+const padreDesconocido = ref(false);
+const madreDesconocida = ref(false);
 
-  try {
-    const { data } = await axios.get(
-      `/api/distritos/${estudiante.value.distritoId}/ubicacion`
-    );
+const padre = ref({
+  nombre: "",
+  telefono: "",
+  dui: "",
+  correo: ""
+});
 
-    // Asignación de tus atributos originales
-    estudiante.value.departamentoId = data.departamento.id;
-    estudiante.value.municipioId = data.municipio.id;
-    estudiante.value.distritoId = data.distrito.id;
+const madre = ref({
+  nombre: "",
+  telefono: "",
+  dui: "",
+  correo: ""
+});
 
-    departamentoNombre.value = data.departamento.nombre;
-    municipioNombre.value = data.municipio.nombre;
-
-  } catch (error) {
-    console.error(error);
+const togglePadreDesconocido = () => {
+  if (padreDesconocido.value) {
+    padre.value = { nombre: "", telefono: "", dui: "", correo: "" };
   }
 };
 
-// Limpia el estado si el usuario borra por completo el buscador
-const verificarLimpieza = () => {
-  if (!filtroTexto.value) {
-    estudiante.value.distritoId = null;
-    estudiante.value.departamentoId = null;
-    estudiante.value.municipioId = null;
-    departamentoNombre.value = "";
-    municipioNombre.value = "";
+const toggleMadreDesconocida = () => {
+  if (madreDesconocida.value) {
+    madre.value = { nombre: "", telefono: "", dui: "", correo: "" };
   }
 };
 
 const guardarEstudiante = () => {
   if (
     !estudiante.value.nombres ||
-    !estudiante.value.NIE ||
+    !estudiante.value.nie ||
     !estudiante.value.genero ||
-    !estudiante.value.distritoId
+    !estudiante.value.distrito_id
   ) {
-    alert("Complete todos los campos obligatorios.");
+    alert("Complete todos los campos obligatorios del estudiante.");
     return;
   }
 
-  emit("save", {
-    ...estudiante.value
-  });
+  // Payload estructurado en snake_case para Laravel
+  const payload = {
+    ...estudiante.value,
+    padre: padreDesconocido.value ? null : { ...padre.value },
+    madre: madreDesconocida.value ? null : { ...madre.value },
+    padre_desconocido: padreDesconocido.value,
+    madre_desconocida: madreDesconocida.value
+  };
+
+  emit("save", payload);
 };
 
 const cancelar = () => {
@@ -116,106 +161,20 @@ const cancelar = () => {
         />
       </div>
 
-      <!-- Lugar de nacimiento -->
+      <!-- NIE -->
       <div>
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">
-          Lugar de nacimiento
-        </h3>
-
-        <div class="grid md:grid-cols-3 gap-4">
-
-          <!-- Buscador de Distrito con Autocompletado -->
-          <div class="relative">
-            <label class="text-sm text-gray-600">
-              Distrito
-            </label>
-            <input
-              v-model="filtroTexto"
-              type="text"
-              @input="verificarLimpieza"
-              @focus="mostrarSugerencias = true"
-              @blur="setTimeout(() => mostrarSugerencias = false, 200)"
-              class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              placeholder="Escribe el distrito..."
-            />
-            <ul
-              v-if="mostrarSugerencias && distritosFiltrados.length > 0"
-              class="absolute z-10 w-full bg-white border rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg"
-            >
-              <li
-                v-for="distrito in distritosFiltrados"
-                :key="distrito.id"
-                @mousedown="seleccionarDistrito(distrito)"
-                class="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-              >
-                {{ distrito.nombre }}
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <label class="text-sm text-gray-600">
-              Municipio
-            </label>
-            <input
-              :value="municipioNombre"
-              readonly
-              class="w-full mt-1 px-4 py-2 border rounded-lg bg-gray-100"
-              placeholder="Automático"
-            />
-          </div>
-
-          <div>
-            <label class="text-sm text-gray-600">
-              Departamento
-            </label>
-            <input
-              :value="departamentoNombre"
-              readonly
-              class="w-full mt-1 px-4 py-2 border rounded-lg bg-gray-100"
-              placeholder="Automático"
-            />
-          </div>
-
-        </div>
-      </div>
-
-      <div>
-        <label class="block text-sm text-gray-600 mb-1">
-          Cantón
-        </label>
-        <textarea
-          v-model="estudiante.canton"
-          rows="2"
-          class="w-full px-4 py-2 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 outline-none"
-          placeholder="Escriba el cantón o caserío correspondiente..."
-        />
-      </div>
-
-      <div>
-        <label class="block text-sm text-gray-600 mb-1">
-          Correo electrónico
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          NIE
         </label>
         <input
-          v-model="estudiante.correo"
-          type="email"
-          class="w-full px-4 py-2 border rounded-lg"
-          placeholder="ejemplo@correo.com"
+          v-model="estudiante.nie"
+          type="text"
+          class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+          placeholder="Ingrese el NIE"
         />
       </div>
 
-      <div>
-        <label class="block text-sm text-gray-600 mb-1">
-          Dirección
-        </label>
-        <textarea
-          v-model="estudiante.direccion"
-          rows="3"
-          class="w-full px-4 py-2 border rounded-lg resize-none"
-          placeholder="Ingrese la dirección completa"
-        />
-      </div>
-
+      <!-- Género -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-3">
           Género
@@ -241,6 +200,276 @@ const cancelar = () => {
         </div>
       </div>
 
+      <!-- Lugar de nacimiento (Distrito primero) -->
+      <div>
+        <h3 class="text-sm font-semibold text-gray-700 mb-3">
+          Lugar de nacimiento
+        </h3>
+        <div class="grid md:grid-cols-3 gap-4">
+          
+          <!-- 1. Distrito (Primero en la línea) -->
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">
+              Distrito
+            </label>
+            <select
+              v-model="estudiante.distrito_id"
+              @change="alCambiarDistrito"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            >
+              <option :value="null">Seleccione...</option>
+              <option
+                v-for="distrito in todosLosDistritos"
+                :key="distrito.id"
+                :value="distrito.id"
+              >
+                {{ distrito.nombre }}
+              </option>
+            </select>
+          </div>
+
+          <!-- 2. Municipio (Read-only / Autocompletado) -->
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">
+              Municipio
+            </label>
+            <select
+              v-model="estudiante.municipio_id"
+              disabled
+              class="w-full px-4 py-2 border rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed outline-none"
+            >
+              <option :value="null">Seleccione...</option>
+              <optgroup v-for="(municipios, idDepto) in listaMunicipios" :key="idDepto">
+                <option v-for="municipio in municipios" :key="municipio.id" :value="municipio.id">
+                  {{ municipio.nombre }}
+                </option>
+              </optgroup>
+            </select>
+          </div>
+
+          <!-- 3. Departamento (Read-only / Autocompletado) -->
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">
+              Departamento
+            </label>
+            <select
+              v-model="estudiante.departamento_id"
+              disabled
+              class="w-full px-4 py-2 border rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed outline-none"
+            >
+              <option :value="null">Seleccione...</option>
+              <option
+                v-for="departamento in listaDepartamentos"
+                :key="departamento.id"
+                :value="departamento.id"
+              >
+                {{ departamento.nombre }}
+              </option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Cantón -->
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">
+          Cantón
+        </label>
+        <textarea
+          v-model="estudiante.canton"
+          rows="2"
+          class="w-full px-4 py-2 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 outline-none"
+          placeholder="Escriba el cantón o caserío correspondiente..."
+        />
+      </div>
+
+      <!-- Dirección -->
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">
+          Dirección
+        </label>
+        <textarea
+          v-model="estudiante.direccion"
+          rows="3"
+          class="w-full px-4 py-2 border rounded-lg resize-none"
+          placeholder="Ingrese la dirección completa"
+        />
+      </div>
+
+      <!-- Teléfono y Correo -->
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">
+            Teléfono
+          </label>
+          <input
+            v-model="estudiante.telefono"
+            type="text"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            placeholder="Teléfono"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">
+            Correo electrónico
+          </label>
+          <input
+            v-model="estudiante.correo"
+            type="email"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            placeholder="ejemplo@correo.com"
+          />
+        </div>
+      </div>
+
+      <!-- Información de los padres -->
+      <div class="border-t pt-6">
+        <h3 class="text-sm font-semibold text-gray-700 mb-4">
+          Información de los padres
+        </h3>
+
+        <!-- Padre -->
+        <div class="border rounded-lg p-4 space-y-4">
+          <div class="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="padreDesconocido"
+              v-model="padreDesconocido"
+              @change="togglePadreDesconocido"
+            />
+            <label for="padreDesconocido" class="text-sm font-medium text-gray-700 cursor-pointer">
+              Padre desconocido
+            </label>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">
+                Nombre
+              </label>
+              <input
+                v-model="padre.nombre"
+                :disabled="padreDesconocido"
+                type="text"
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="Nombre del padre"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">
+                Teléfono
+              </label>
+              <input
+                v-model="padre.telefono"
+                :disabled="padreDesconocido"
+                type="text"
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="Teléfono del padre"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">
+                DUI
+              </label>
+              <input
+                v-model="padre.dui"
+                :disabled="padreDesconocido"
+                type="text"
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="DUI del padre"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">
+                Correo electrónico
+              </label>
+              <input
+                v-model="padre.correo"
+                :disabled="padreDesconocido"
+                type="email"
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="Correo del padre"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Madre -->
+        <div class="border rounded-lg p-4 space-y-4 mt-4">
+          <div class="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="madreDesconocida"
+              v-model="madreDesconocida"
+              @change="toggleMadreDesconocida"
+            />
+            <label for="madreDesconocida" class="text-sm font-medium text-gray-700 cursor-pointer">
+              Madre desconocida
+            </label>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">
+                Nombre
+              </label>
+              <input
+                v-model="madre.nombre"
+                :disabled="madreDesconocida"
+                type="text"
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="Nombre de la madre"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">
+                Teléfono
+              </label>
+              <input
+                v-model="madre.telefono"
+                :disabled="madreDesconocida"
+                type="text"
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="Teléfono de la madre"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">
+                DUI
+              </label>
+              <input
+                v-model="madre.dui"
+                :disabled="madreDesconocida"
+                type="text"
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="DUI de la madre"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">
+                Correo electrónico
+              </label>
+              <input
+                v-model="madre.correo"
+                :disabled="madreDesconocida"
+                type="email"
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="Correo de la madre"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de acción -->
       <div class="flex justify-end gap-3 pt-4">
         <button
           type="button"
@@ -257,7 +486,6 @@ const cancelar = () => {
           Guardar estudiante
         </button>
       </div>
-
     </form>
   </div>
 </template>
