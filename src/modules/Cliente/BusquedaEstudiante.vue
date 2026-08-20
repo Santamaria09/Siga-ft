@@ -4,22 +4,22 @@ import { storeToRefs } from "pinia";
 import { useMatriculaStore } from "@/stores/matricula";
 
 const matriculaStore = useMatriculaStore();
-const { estudiantesDemo } = storeToRefs(matriculaStore);
+// 1. Extraemos la variable correcta del store
+const { estudiantesBuscados, cargando } = storeToRefs(matriculaStore);
 
 const nieBusqueda = ref("");
-const resultadosBusqueda = ref([]);
 
-const buscarEstudiante = () => {
-  const termino = nieBusqueda.value.trim().toLowerCase();
+// 2. Simplificamos la función para que use el Backend/Servicio
+const buscarEstudiante = async () => {
+  const termino = nieBusqueda.value.trim();
   
   if (!termino) {
-    resultadosBusqueda.value = [];
+    estudiantesBuscados.value = [];
     return;
   }
   
-  resultadosBusqueda.value = estudiantesDemo.value.filter(
-    (e) => e.NIE.toLowerCase().includes(termino)
-  );
+  // Ejecutamos la acción del store
+  await matriculaStore.buscarEstudiante(termino);
 };
 
 const seleccionarEstudiante = (estudiante) => {
@@ -29,6 +29,9 @@ const seleccionarEstudiante = (estudiante) => {
 const volverASeleccionTipo = () => {
   matriculaStore.tipoMatricula = "";
   matriculaStore.pasoAntiguo = "busqueda";
+  // Limpiar la búsqueda al salir
+  estudiantesBuscados.value = [];
+  nieBusqueda.value = "";
 };
 
 const hasBusqueda = computed(() => nieBusqueda.value.trim().length > 0);
@@ -60,16 +63,18 @@ const hasBusqueda = computed(() => nieBusqueda.value.trim().length > 0);
       />
       <button
         @click="buscarEstudiante"
-        class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center gap-2"
+        :disabled="cargando"
+        class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <i class="pi pi-search"></i>
-        Buscar
+        <i :class="cargando ? 'pi pi-spinner pi-spin' : 'pi pi-search'"></i>
+        {{ cargando ? 'Buscando...' : 'Buscar' }}
       </button>
     </div>
 
-    <div v-if="resultadosBusqueda.length > 0" class="space-y-3">
+    <!-- 3. Iteramos sobre la variable global del store en lugar de la local -->
+    <div v-if="estudiantesBuscados.length > 0" class="space-y-3">
       <div
-        v-for="est in resultadosBusqueda"
+        v-for="est in estudiantesBuscados"
         :key="est.id"
         @click="seleccionarEstudiante(est)"
         class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition flex items-center gap-4"
@@ -84,7 +89,7 @@ const hasBusqueda = computed(() => nieBusqueda.value.trim().length > 0);
           <p class="font-medium text-gray-800">{{ est.nombres }}</p>
           <p class="text-sm text-gray-500">NIE: {{ est.NIE }}</p>
           <p class="text-xs text-gray-400">
-            Grados actuales: {{ est.gradoActual }} - {{ est.turnoActual }}
+            Grados actuales: {{ est.gradoActual || 'N/A' }} - {{ est.turnoActual || 'N/A' }}
           </p>
         </div>
         <i class="pi pi-chevron-right text-gray-400"></i>
@@ -92,7 +97,7 @@ const hasBusqueda = computed(() => nieBusqueda.value.trim().length > 0);
     </div>
 
     <div
-      v-else-if="hasBusqueda && !resultadosBusqueda.length"
+      v-else-if="hasBusqueda && !estudiantesBuscados.length && !cargando"
       class="text-center py-8 text-gray-400"
     >
       <i class="pi pi-search text-3xl mb-2"></i>

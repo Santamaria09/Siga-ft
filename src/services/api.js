@@ -1,13 +1,18 @@
-import axios from "axios";
+import axios from 'axios'
+import { useAuthStore } from '@/stores/authStore'
+
 const api = axios.create({
-  baseURL: "http://localhost:8000/api",
-  headers: { "Content-Type": "application/json", Accept: "application/json" },
-});
+  baseURL: 'http://localhost:8000/api'
+})
+
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const authStore = useAuthStore()
+
+  if (authStore.token) {
+    config.headers.Authorization = `Bearer ${authStore.token}`
   }
-  return config;
-});
-export default api;
+
+  return config
+})
+
+export default api

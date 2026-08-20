@@ -35,33 +35,12 @@ const toggleSidebar = () => {
   uiStore.setSidebarOpen(!sidebarOpen.value);
 };
 
-const buscarOtroEstudiante = () => {
-  // Retorna a la vista de búsqueda
-  matriculaStore.pasoAntiguo = "busqueda";
-
-  // Limpia los datos de identidad
-  matriculaStore.estudianteSeleccionado = null;
-  matriculaStore.encargadoSeleccionado = null;
-  matriculaStore.encargadoManual = false;
-
-  // CORRECCIÓN DIRECTA: Previene fuga de estado limpiando los datos de matrícula y salud
-  matriculaStore.gradoSelected = "";
-  matriculaStore.turnoSelected = "";
-  matriculaStore.especialidadSelected = "";
-  matriculaStore.repiteGrado = "";
-  matriculaStore.salud = {
-    enfermedadId: "",
-    discapacidadId: "",
-    medicamentoId: "",
-  };
-};
-
 const cancelarTodo = () => {
+  // CORRECCIÓN DIRECTA: Llama a la acción del store que limpia todo el estado global de matrícula
   matriculaStore.resetearTodo();
 };
 
 const confirmarMatricula = async () => {
-  // CORRECCIÓN DIRECTA: Evalúa qué datos de encargado enviar al backend
   const datosEncargado =
     esAntiguoIngreso.value &&
     !matriculaStore.encargadoManual &&
@@ -75,7 +54,6 @@ const confirmarMatricula = async () => {
       ...matriculaStore.estudiante,
       foto: matriculaStore.fotoPreview || estudianteSeleccionado.value?.foto || "",
     },
-    // Envía el objeto resuelto en la lógica superior
     encargado: datosEncargado,
     salud: matriculaStore.salud,
     matriculaDetails: {
@@ -88,7 +66,12 @@ const confirmarMatricula = async () => {
 
   try {
     console.log("Enviando matrícula:", payload);
-    alert("Matrícula procesada exitosamente.");
+    Swal.fire({
+  title: "Good job!",
+  text: "You clicked the button!",
+  icon: "success"
+});
+    matriculaStore.resetearTodo();
     router.push("/cliente/registro");
   } catch {
     alert("Hubo un error al procesar la matrícula.");
@@ -199,7 +182,7 @@ const confirmarMatricula = async () => {
         </div>
         <button
           v-if="
-            (esNuevoIngreso && pasoNuevo === 'formulario') ||
+            (esNuevoIngreso && tipoMatricula) ||
             (esAntiguoIngreso && pasoAntiguo === 'formulario')
           "
           @click="confirmarMatricula"

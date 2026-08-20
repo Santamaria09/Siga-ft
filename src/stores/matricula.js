@@ -1,6 +1,6 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
-import api from "@/api/api";
+import { matriculaService } from "@/services/matriculaService";
 
 export const useMatriculaStore = defineStore("matricula", () => {
   // --- ESTADOS DE CONTROL Y NAVEGACIÓN ---
@@ -82,22 +82,17 @@ export const useMatriculaStore = defineStore("matricula", () => {
     tipoMatricula.value === "antiguo" ? "Antiguo Ingreso" : "Nuevo Ingreso"
   );
 
-  // --- PETICIONES A LA API (MÉTODOS ASÍNCRONOS) ---
+  // --- PETICIONES MEDIANTE EL SERVICIO ---
 
-  // 1. Cargar catálogos desde el Backend
+  // 1. Cargar catálogos desde el Servicio
   const cargarCatalogos = async () => {
     try {
       cargando.value = true;
-      // Ajustar las rutas según los endpoints reales definidos con tu equipo
-      const [resGrados, resTurnos, resParentescos] = await Promise.all([
-        api.get("/grados"),
-        api.get("/turnos"),
-        api.get("/parentescos")
-      ]);
+      const response = await matriculaService.obtenerCatalogos();
 
-      grados.value = resGrados.data;
-      turnos.value = resTurnos.data;
-      parentescos.value = resParentescos.data;
+      grados.value = response.data.grados;
+      turnos.value = response.data.turnos;
+      parentescos.value = response.data.parentescos;
     } catch (error) {
       console.error("Error al obtener catálogos iniciales:", error);
     } finally {
@@ -109,7 +104,7 @@ export const useMatriculaStore = defineStore("matricula", () => {
   const buscarEstudiante = async (termino) => {
     try {
       cargando.value = true;
-      const { data } = await api.get(`/estudiantes/buscar?q=${termino}`);
+      const { data } = await matriculaService.buscarEstudiante(termino);
       estudiantesBuscados.value = data;
     } catch (error) {
       console.error("Error al buscar estudiante:", error);
@@ -118,7 +113,7 @@ export const useMatriculaStore = defineStore("matricula", () => {
     }
   };
 
-  // 3. Procesar y enviar todo el formulario de matrícula a Laravel
+  // 3. Procesar y enviar todo el formulario de matrícula
   const enviarMatriculaBackend = async () => {
     cargando.value = true;
     erroresValidacion.value = null;
@@ -165,12 +160,8 @@ export const useMatriculaStore = defineStore("matricula", () => {
       formData.append("discapacidades", JSON.stringify(salud.value.discapacidades));
       formData.append("medicamentos", JSON.stringify(salud.value.medicamentos));
 
-      // Envío POST con headers de multipart/form-data
-      const response = await api.post("/matriculas", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      // Envío a través del servicio
+      const response = await matriculaService.enviarMatricula(formData);
 
       console.log("Matrícula guardada exitosamente:", response.data);
       return { exito: true, data: response.data };
@@ -243,7 +234,9 @@ export const useMatriculaStore = defineStore("matricula", () => {
   const resetearTodo = () => {
     tipoMatricula.value = "";
     pasoAntiguo.value = "busqueda";
+    pasoNuevo.value = "busqueda";
     estudianteSeleccionado.value = null;
+    estudiantesBuscados.value = []; // <--- CORRECCIÓN: Limpia la lista de búsqueda
     estudiante.value = { nombres: "", NIE: "" };
     fotoEstudiante.value = null;
     fotoPreview.value = "";

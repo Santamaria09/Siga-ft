@@ -25,7 +25,7 @@
           class="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-md border border-white/20 overflow-hidden"
         >
           <img
-            src="/public/LogoDefi.jpeg"
+            src="/LogoDefi.jpeg"
             alt="Logo"
             class="w-full h-full object-cover"
           />
