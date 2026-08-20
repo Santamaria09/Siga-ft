@@ -73,7 +73,7 @@ const estudiantes = ref([
       <div class="p-6">
         <div class="flex justify-end mb-6">
           <button
-            @click="abrirTipoMatricula"
+            @click="router.push({ name: 'matriculas-cliente' })"
             class="flex items-center gap-2 px-5 py-3 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 transition shadow-md"
           >
             <i class="pi pi-file-edit"></i>
