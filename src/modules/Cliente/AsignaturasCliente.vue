@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useUiStore } from "@/stores/ui";
 import SidebarCliente from "./SidebarCliente.vue";
@@ -7,112 +7,81 @@ import SidebarCliente from "./SidebarCliente.vue";
 const uiStore = useUiStore();
 const { sidebarOpen } = storeToRefs(uiStore);
 
+// --- DATOS DE LOS ESTUDIANTES ---
 const hijos = ref([
   {
     id: 1,
     nombre: "Juan Pérez",
     grado: "5° Primaria",
     seccion: "A",
-    periodo: "2026",
   },
   {
     id: 2,
     nombre: "María Ruiz",
     grado: "3° Primaria",
     seccion: "B",
-    periodo: "2026",
   },
 ]);
 
-const hijoSeleccionado = ref(hijos.value[0]);
+const hijoSeleccionadoId = ref(hijos.value[0].id);
 
+// --- ASIGNATURAS POR ESTUDIANTE (Ejemplo dinámico o estático) ---
 const asignaturas = ref([
   {
     id: 1,
     nombre: "Matemáticas",
+    tipo: "Asignatura",
     profesor: "Ing. María González",
-    color: "blue",
-    icono: "pi-calculator",
+    icono: "pi pi-calculator",
+    colorBarra: "bg-blue-600",
+    bgIcon: "bg-blue-50 text-blue-600",
   },
   {
     id: 2,
     nombre: "Lenguaje y Literatura",
+    tipo: "Asignatura",
     profesor: "Ing. María González",
-    color: "amber",
-    icono: "pi-book",
+    icono: "pi pi-file",
+    colorBarra: "bg-amber-500",
+    bgIcon: "bg-amber-50 text-amber-600",
   },
   {
     id: 3,
     nombre: "Ciencias Naturales",
+    tipo: "Asignatura",
     profesor: "Ing. María González",
-    color: "green",
-    icono: "pi-lightbulb",
+    icono: "pi pi-lightbulb",
+    colorBarra: "bg-emerald-500",
+    bgIcon: "bg-emerald-50 text-emerald-600",
   },
   {
     id: 4,
     nombre: "Estudios Sociales",
+    tipo: "Asignatura",
     profesor: "Ing. María González",
-    dia: "Martes, Viernes",
-    color: "blue",
-    icono: "pi-globe",
+    icono: "pi pi-globe",
+    colorBarra: "bg-blue-500",
+    bgIcon: "bg-blue-50 text-blue-500",
   },
   {
     id: 5,
     nombre: "Educación Física",
+    tipo: "Asignatura",
     profesor: "Prof. Laura Sánchez",
-    dia: "Jueves",
-    color: "red",
-    icono: "pi-heart",
+    icono: "pi pi-heart",
+    colorBarra: "bg-rose-500",
+    bgIcon: "bg-rose-50 text-rose-500",
   },
   {
     id: 6,
     nombre: "Inglés",
+    tipo: "Asignatura",
     profesor: "Lic. Patricia Ruiz",
-    color: "violet",
-    icono: "pi-comments",
+    icono: "pi pi-comments",
+    colorBarra: "bg-purple-500",
+    bgIcon: "bg-purple-50 text-purple-600",
   },
 ]);
-
-const getColorClasses = (color) => {
-  const colors = {
-    blue: {
-      bg: "bg-blue-100",
-      text: "text-blue-600",
-      from: "from-blue-400",
-      to: "to-blue-600",
-    },
-
-    violet: {
-      bg: "bg-violet-100",
-      text: "text-violet-600",
-      from: "from-violet-400",
-      to: "to-violet-600",
-    },
-
-    amber: {
-      bg: "bg-amber-100",
-      text: "text-amber-600",
-      from: "from-amber-400",
-      to: "to-amber-600",
-    },
-
-    red: {
-      bg: "bg-red-100",
-      text: "text-red-600",
-      from: "from-red-400",
-      to: "to-red-600",
-    },
-
-    green: {
-      bg: "bg-green-100",
-      text: "text-green-600",
-      from: "from-green-400",
-      to: "to-green-600",
-    },
-  };
-
-  return colors[color] || colors.blue;
-};
 
 const toggleSidebar = () => {
   sidebarOpen.value = !sidebarOpen.value;
@@ -123,7 +92,9 @@ const toggleSidebar = () => {
   <div class="min-h-screen bg-gray-50">
     <SidebarCliente :open="sidebarOpen" @close="uiStore.setSidebarOpen(false)" />
 
-    <main :class="['transition-all duration-300', sidebarOpen ? 'md:ml-64' : 'ml-0']">
+    <main :class="['transition-all duration-300 flex flex-col', sidebarOpen ? 'md:ml-64' : 'ml-0']">
+      
+      <!-- HEADER PRINCIPAL -->
       <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
         <div class="px-6 py-4 flex items-center justify-between">
           <div class="flex items-center gap-4">
@@ -133,110 +104,95 @@ const toggleSidebar = () => {
             >
               <i :class="['text-xl', sidebarOpen ? 'pi pi-times' : 'pi pi-bars']"></i>
             </button>
-
             <h1 class="text-xl font-bold text-gray-800">Mis Asignaturas</h1>
           </div>
         </div>
       </header>
 
-      <div class="p-6 lg:p-8">
-        <div class="mb-8">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <button
-              v-for="hijo in hijos"
-              :key="hijo.id"
-              @click="hijoSeleccionado = hijo"
-              :class="[
-                'rounded-2xl p-4 transition text-left border w-full',
-                hijoSeleccionado.id === hijo.id
-                  ? 'bg-blue-900 text-white border-blue-900 shadow-lg'
-                  : 'bg-white border-gray-200 hover:border-gray-500',
-              ]"
+      <!-- CONTENIDO PRINCIPAL -->
+      <div class="p-6 lg:p-8 flex-1">
+        
+        <!-- BARRA SUPERIOR: SELECTOR DE ESTUDIANTE ANCHO Y CÓMODO -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+              <i class="pi pi-users text-lg"></i>
+            </div>
+            <div>
+              <h2 class="text-sm font-bold text-gray-800">Seleccionar Estudiante</h2>
+            </div>
+          </div>
+
+          <!-- Selector Grande y Estilizado -->
+          <div class="relative w-full sm:w-80">
+            <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-600">
+              <i class="pi pi-user text-sm"></i>
+            </div>
+            <select 
+              v-model="hijoSeleccionadoId" 
+              class="w-full bg-gray-50 border border-gray-200 text-gray-800 font-bold text-sm rounded-xl pl-10 pr-10 py-3 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white cursor-pointer appearance-none transition"
             >
-              <div class="flex items-center gap-3">
-                <div
-                  :class="[
-                    'w-10 h-10 rounded-full flex items-center justify-center',
-                    hijoSeleccionado.id === hijo.id ? 'bg-white/20' : 'bg-gray-100',
-                  ]"
-                >
-                  <i class="pi pi-user"></i>
-                </div>
-
-                <div>
-                  <h4 class="font-semibold">
-                    {{ hijo.nombre }}
-                  </h4>
-
-                  <p
-                    class="text-sm"
-                    :class="hijoSeleccionado.id === hijo.id ? 'text-blue-100' : 'text-gray-500'"
-                  >
-                    {{ hijo.grado }} • {{ hijo.seccion }}
-                  </p>
-                </div>
-              </div>
-            </button>
+              <option v-for="hijo in hijos" :key="hijo.id" :value="hijo.id">
+                {{ hijo.nombre }} ({{ hijo.grado }})
+              </option>
+            </select>
+            <i class="pi pi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none"></i>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <!-- TARJETAS DE ASIGNATURAS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div
             v-for="asignatura in asignaturas"
             :key="asignatura.id"
-            class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow overflow-hidden"
+            class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition flex flex-col justify-between"
           >
-            <div class="p-5">
+            <!-- Cuerpo de la tarjeta -->
+            <div class="p-6">
               <div class="flex items-start justify-between mb-4">
-                <div class="flex items-center gap-3">
-                  <div
-                    :class="[
-                      'w-12 h-12 rounded-lg flex items-center justify-center',
-                      getColorClasses(asignatura.color).bg,
-                      getColorClasses(asignatura.color).text,
-                    ]"
-                  >
-                    <i :class="['pi', asignatura.icono, 'text-xl']"></i>
-                  </div>
-
-                  <div>
-                    <h3 class="font-bold text-gray-800 text-lg">
-                      {{ asignatura.nombre }}
-                    </h3>
-
-                    <p class="text-sm text-gray-500">Asignatura</p>
-                  </div>
+                <div :class="['w-12 h-12 rounded-xl flex items-center justify-center text-lg', asignatura.bgIcon]">
+                  <i :class="asignatura.icono"></i>
                 </div>
+                <span class="text-[11px] font-bold px-2.5 py-1 bg-gray-100 text-gray-600 rounded-lg">
+                  {{ asignatura.tipo }}
+                </span>
               </div>
 
-              <div class="space-y-3">
-                <div class="flex items-center gap-2">
-                  <i class="pi pi-user text-gray-400 text-sm"></i>
-
-                  <span class="text-sm text-gray-700">
-                    {{ asignatura.profesor }}
-                  </span>
-                </div>
-              </div>
+              <h3 class="text-lg font-bold text-gray-800 mb-1">{{ asignatura.nombre }}</h3>
+              <p class="text-xs text-gray-400 flex items-center gap-1.5 mt-3">
+                <i class="pi pi-user text-gray-400 text-[11px]"></i>
+                {{ asignatura.profesor }}
+              </p>
             </div>
 
-            <div
-              :class="[
-                'h-1 w-full bg-gradient-to-r',
-                getColorClasses(asignatura.color).from,
-                getColorClasses(asignatura.color).to,
-              ]"
-            ></div>
+            <!-- Línea de color inferior decorativa -->
+            <div :class="['h-1.5 w-full', asignatura.colorBarra]"></div>
           </div>
         </div>
+
       </div>
     </main>
 
     <div
       v-if="sidebarOpen"
       @click="toggleSidebar"
-      class="md:hidden fixed inset-0 bg-black/30 z-30"
+      class="md:hidden fixed inset-0 bg-black/40 z-20 backdrop-blur-sm transition-opacity"
     ></div>
   </div>
 </template>
-```
+
+<style scoped>
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>

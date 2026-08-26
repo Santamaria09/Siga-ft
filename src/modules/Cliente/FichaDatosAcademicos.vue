@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useMatriculaStore } from "@/stores/matricula";
 
@@ -28,28 +28,34 @@ const provieneOtroCentro = ref(false);
 
 const manejarCambioCentro = () => {
   if (!provieneOtroCentro.value) {
-    // Si desmarca la casilla, limpiamos el archivo del store para evitar datos fantasma
     certificadoEstudiante.value = null;
+    estudiante.value.NIE = "";
   }
 };
 
-// Variables temporales para la selección de salud por botón
-const tempEnfermedad = ref("");
+// --- NUEVO: Computado para manejar la enfermedad única como combobox ---
+const enfermedadPrincipal = computed({
+  get: () => salud.value.enfermedades.length > 0 ? salud.value.enfermedades[0] : "",
+  set: (val) => {
+    if (val) {
+      salud.value.enfermedades = [val]; // Lo guarda como array de 1 elemento para Laravel
+    } else {
+      salud.value.enfermedades = [];
+    }
+  }
+});
+
+// Variables temporales para discapacidades y medicamentos
 const tempDiscapacidad = ref("");
 const tempMedicamento = ref("");
 
 const agregarSalud = (tipo) => {
-  if (tipo === 'enfermedad' && tempEnfermedad.value) {
-    if (!salud.value.enfermedades.includes(tempEnfermedad.value)) {
-      salud.value.enfermedades.push(tempEnfermedad.value);
-    }
-    tempEnfermedad.value = "";
-  } else if (tipo === 'discapacidad' && tempDiscapacidad.value) {
+  if (tipo === "discapacidad" && tempDiscapacidad.value) {
     if (!salud.value.discapacidades.includes(tempDiscapacidad.value)) {
       salud.value.discapacidades.push(tempDiscapacidad.value);
     }
     tempDiscapacidad.value = "";
-  } else if (tipo === 'medicamento' && tempMedicamento.value) {
+  } else if (tipo === "medicamento" && tempMedicamento.value) {
     if (!salud.value.medicamentos.includes(tempMedicamento.value)) {
       salud.value.medicamentos.push(tempMedicamento.value);
     }
@@ -58,12 +64,10 @@ const agregarSalud = (tipo) => {
 };
 
 const eliminarSalud = (tipo, id) => {
-  if (tipo === 'enfermedad') {
-    salud.value.enfermedades = salud.value.enfermedades.filter(item => item !== id);
-  } else if (tipo === 'discapacidad') {
-    salud.value.discapacidades = salud.value.discapacidades.filter(item => item !== id);
-  } else if (tipo === 'medicamento') {
-    salud.value.medicamentos = salud.value.medicamentos.filter(item => item !== id);
+  if (tipo === "discapacidad") {
+    salud.value.discapacidades = salud.value.discapacidades.filter((item) => item !== id);
+  } else if (tipo === "medicamento") {
+    salud.value.medicamentos = salud.value.medicamentos.filter((item) => item !== id);
   }
 };
 </script>
@@ -75,7 +79,9 @@ const eliminarSalud = (tipo, id) => {
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Foto -->
         <div class="flex flex-col items-center text-center space-y-4">
-          <div class="w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-lg flex-shrink-0">
+          <div
+            class="w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-lg flex-shrink-0"
+          >
             <img
               v-if="fotoPreview || estudianteSeleccionado?.foto"
               :src="fotoPreview || estudianteSeleccionado?.foto"
@@ -100,32 +106,27 @@ const eliminarSalud = (tipo, id) => {
         <!-- Campos del estudiante -->
         <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo del Estudiante</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Nombre Completo del Estudiante</label
+            >
             <input
               v-model="estudiante.nombres"
               type="text"
-              readonly
               placeholder="Ingrese el nombre completo"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 outline-none cursor-not-allowed"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">NIE</label>
-            <input
-              v-model="estudiante.NIE"
-              type="text"
-              readonly
-              placeholder="Número de Identidad"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 outline-none cursor-not-allowed"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Grado a Matricular</label>
-            <select v-model="gradoSelected" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            <select
+              v-model="gradoSelected"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            >
               <option value="">Seleccionar grado</option>
-              <option v-for="grado in grados" :key="grado.id" :value="grado.id">{{ grado.nombre }}</option>
+              <option v-for="grado in grados" :key="grado.id" :value="grado.id">
+                {{ grado.nombre }}
+              </option>
             </select>
           </div>
 
@@ -142,22 +143,32 @@ const eliminarSalud = (tipo, id) => {
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Turno</label>
-            <select v-model="turnoSelected" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            <select
+              v-model="turnoSelected"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            >
               <option value="">Seleccionar turno</option>
-              <option v-for="turno in turnos" :key="turno.id" :value="turno.id">{{ turno.nombre }}</option>
+              <option v-for="turno in turnos" :key="turno.id" :value="turno.id">
+                {{ turno.nombre }}
+              </option>
             </select>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">¿Repite el grado seleccionado?</label>
-            <select v-model="repiteGrado" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >¿Repite el grado seleccionado?</label
+            >
+            <select
+              v-model="repiteGrado"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            >
               <option value="">Seleccionar respuesta</option>
               <option value="Sí">Sí, repite grado</option>
               <option value="No">No, es nuevo en el grado</option>
             </select>
           </div>
 
-          <!-- Certificado del último año aprobado (Con Checkbox de Validación) -->
+          <!-- Checkbox de Validación y NIE -->
           <div class="md:col-span-2 mt-2 pt-4 border-t border-gray-100">
             <div class="flex items-center mb-4">
               <input
@@ -167,32 +178,52 @@ const eliminarSalud = (tipo, id) => {
                 @change="manejarCambioCentro"
                 class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
               />
-              <label for="provieneOtroCentro" class="ml-2 text-sm font-medium text-gray-700 cursor-pointer select-none">
+              <label
+                for="provieneOtroCentro"
+                class="ml-2 text-sm font-medium text-gray-700 cursor-pointer select-none"
+              >
                 ¿El estudiante proviene de otro centro escolar?
               </label>
             </div>
 
-            <div v-if="provieneOtroCentro" class="animate-fade-in">
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                Certificado del último año aprobado
-              </label>
-              <p class="text-xs text-gray-500 mb-3">
-                Formatos admitidos: PDF, JPG, PNG.
-              </p>
-              <div class="flex items-center gap-4">
+            <div
+              v-if="provieneOtroCentro"
+              class="animate-fade-in grid grid-cols-1 gap-6 bg-blue-50/50 p-4 rounded-lg border border-blue-100"
+            >
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  NIE del Estudiante
+                </label>
                 <input
-                  type="file"
-                  accept=".pdf, image/jpeg, image/png"
-                  @change="matriculaStore.seleccionarCertificado"
-                  class="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer border border-gray-300 rounded-lg bg-white"
+                  v-model="estudiante.NIE"
+                  type="text"
+                  placeholder="Ingrese el NIE"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 />
-                <span v-if="certificadoEstudiante" class="text-xs font-medium text-green-600 flex items-center shrink-0">
-                  <i class="pi pi-check-circle mr-1"></i> Archivo listo
-                </span>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Certificado del último año aprobado
+                </label>
+                <p class="text-[11px] text-gray-500 mb-2">Formatos admitidos: PDF, JPG, PNG.</p>
+                <div class="flex items-center gap-4">
+                  <input
+                    type="file"
+                    accept=".pdf, image/jpeg, image/png"
+                    @change="matriculaStore.seleccionarCertificado"
+                    class="block w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 cursor-pointer border border-gray-300 rounded-lg bg-white"
+                  />
+                  <span
+                    v-if="certificadoEstudiante"
+                    class="text-xs font-medium text-green-600 flex items-center shrink-0"
+                  >
+                    <i class="pi pi-check-circle mr-1"></i> Listo
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
@@ -200,14 +231,11 @@ const eliminarSalud = (tipo, id) => {
     <!-- BLOQUE 2: ANTIGUO INGRESO -->
     <div v-else-if="esAntiguoIngreso" class="animate-fade-in mb-8">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Foto (disabled) -->
         <div class="flex flex-col items-center text-center space-y-4">
-          <div class="w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-lg flex-shrink-0">
-            <img
-              v-if="fotoPreview"
-              :src="fotoPreview"
-              class="w-full h-full object-cover"
-            />
+          <div
+            class="w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-lg flex-shrink-0"
+          >
+            <img v-if="fotoPreview" :src="fotoPreview" class="w-full h-full object-cover" />
             <div v-else class="w-full h-full flex items-center justify-center bg-gray-100">
               <i class="pi pi-user text-5xl text-gray-300"></i>
             </div>
@@ -215,10 +243,11 @@ const eliminarSalud = (tipo, id) => {
           <p class="text-xs text-gray-400">Foto del estudiante (no editable)</p>
         </div>
 
-        <!-- Datos del estudiante (read-only) y académicos -->
         <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo del Estudiante</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Nombre Completo del Estudiante</label
+            >
             <input
               :value="estudianteSeleccionado?.nombres || ''"
               type="text"
@@ -239,9 +268,14 @@ const eliminarSalud = (tipo, id) => {
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Grado a Matricular</label>
-            <select v-model="gradoSelected" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            <select
+              v-model="gradoSelected"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            >
               <option value="">Seleccionar grado</option>
-              <option v-for="grado in grados" :key="grado.id" :value="grado.id">{{ grado.nombre }}</option>
+              <option v-for="grado in grados" :key="grado.id" :value="grado.id">
+                {{ grado.nombre }}
+              </option>
             </select>
           </div>
 
@@ -258,15 +292,25 @@ const eliminarSalud = (tipo, id) => {
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Turno</label>
-            <select v-model="turnoSelected" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            <select
+              v-model="turnoSelected"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            >
               <option value="">Seleccionar turno</option>
-              <option v-for="turno in turnos" :key="turno.id" :value="turno.id">{{ turno.nombre }}</option>
+              <option v-for="turno in turnos" :key="turno.id" :value="turno.id">
+                {{ turno.nombre }}
+              </option>
             </select>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">¿Repite el grado seleccionado?</label>
-            <select v-model="repiteGrado" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >¿Repite el grado seleccionado?</label
+            >
+            <select
+              v-model="repiteGrado"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            >
               <option value="">Seleccionar respuesta</option>
               <option value="Sí">Sí, repite grado</option>
               <option value="No">No, es nuevo en el grado</option>
@@ -277,107 +321,127 @@ const eliminarSalud = (tipo, id) => {
     </div>
 
     <!-- BLOQUE UNIFICADO DE SALUD -->
-    <div v-if="esNuevoIngreso || esAntiguoIngreso" class="border-t border-gray-200 pt-6 animate-fade-in">
+    <div
+      v-if="esNuevoIngreso || esAntiguoIngreso"
+      class="border-t border-gray-200 pt-6 animate-fade-in"
+    >
       <h3 class="text-sm font-semibold text-gray-700 mb-4">Información de Salud</h3>
-      <p class="text-xs text-gray-500 mb-4">Si el estudiante no posee ninguna, deje las opciones en blanco.</p>
-      
-      <div class="grid grid-cols-2 md:grid-cols-2 gap-6">
+      <p class="text-xs text-gray-500 mb-4">
+        Si el estudiante no posee ninguna, deje las opciones en blanco.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         
-        <!-- ENFERMEDADES -->
+        <!-- ENFERMEDAD PRINCIPAL (Combo box simple) -->
         <div class="flex flex-col">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Enfermedades</label>
-          <div class="flex gap-2 mb-3">
-            <select v-model="tempEnfermedad" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
-              <option value="" disabled>Seleccione...</option>
-              <option 
-                v-for="enf in enfermedades.filter(e => e.nombre !== 'Ninguna' && !salud.enfermedades.includes(e.id))" 
-                :key="enf.id" 
-                :value="enf.id"
-              >
-                {{ enf.nombre }}
-              </option>
-            </select>
-            <button @click="agregarSalud('enfermedad')" type="button" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium transition duration-150 ease-in-out">
-              Agregar
-            </button>
-          </div>
-          <div class="flex flex-wrap gap-2 min-h-[32px]">
-            <span 
-              v-for="idEnf in salud.enfermedades" 
-              :key="idEnf" 
-              class="inline-flex items-center py-3 px-4 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
+          <label class="block text-sm font-medium text-gray-700 mb-2">Enfermedad Principal</label>
+          <select
+            v-model="enfermedadPrincipal"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+          >
+            <option value="">Ninguna / Seleccione...</option>
+            <option
+              v-for="enf in enfermedades.filter((e) => e.nombre !== 'Ninguna')"
+              :key="enf.id"
+              :value="enf.id"
             >
-              {{ enfermedades.find(e => e.id === idEnf)?.nombre }}
-              <button @click="eliminarSalud('enfermedad', idEnf)" type="button" class="ml-2 inline-flex text-blue-400 hover:text-blue-600 focus:outline-none">
-                <i class="pi pi-times text-[13px]"></i>
-              </button>
-            </span>
-          </div>
+              {{ enf.nombre }}
+            </option>
+          </select>
         </div>
 
-        <!-- DISCAPACIDADES -->
+        <!-- DISCAPACIDADES (Múltiples) -->
         <div class="flex flex-col">
           <label class="block text-sm font-medium text-gray-700 mb-2">Discapacidades</label>
           <div class="flex gap-2 mb-3">
-            <select v-model="tempDiscapacidad" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+            <select
+              v-model="tempDiscapacidad"
+              class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+            >
               <option value="" disabled>Seleccione...</option>
-              <option 
-                v-for="disc in discapacidades.filter(d => d.nombre !== 'Ninguna' && !salud.discapacidades.includes(d.id))" 
-                :key="disc.id" 
+              <option
+                v-for="disc in discapacidades.filter(
+                  (d) => d.nombre !== 'Ninguna' && !salud.discapacidades.includes(d.id),
+                )"
+                :key="disc.id"
                 :value="disc.id"
               >
                 {{ disc.nombre }}
               </option>
             </select>
-            <button @click="agregarSalud('discapacidad')" type="button" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium transition duration-150 ease-in-out">
+            <button
+              @click="agregarSalud('discapacidad')"
+              type="button"
+              class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium transition duration-150 ease-in-out"
+            >
               Agregar
             </button>
           </div>
           <div class="flex flex-wrap gap-2 min-h-[32px]">
-            <span 
-              v-for="idDisc in salud.discapacidades" 
-              :key="idDisc" 
+            <span
+              v-for="idDisc in salud.discapacidades"
+              :key="idDisc"
               class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
             >
-              {{ discapacidades.find(d => d.id === idDisc)?.nombre }}
-              <button @click="eliminarSalud('discapacidad', idDisc)" type="button" class="ml-2 inline-flex text-blue-400 hover:text-blue-600 focus:outline-none">
+              {{ discapacidades.find((d) => d.id === idDisc)?.nombre }}
+              <button
+                @click="eliminarSalud('discapacidad', idDisc)"
+                type="button"
+                class="ml-2 inline-flex text-blue-400 hover:text-blue-600 focus:outline-none"
+              >
                 <i class="pi pi-times text-[10px]"></i>
               </button>
             </span>
           </div>
         </div>
 
-        <!-- MEDICAMENTOS -->
+        <!-- MEDICAMENTOS (Múltiples) -->
         <div class="flex flex-col">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Medicamentos Frecuentes</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Medicamentos Frecuentes</label
+          >
           <div class="flex gap-2 mb-3">
-            <select v-model="tempMedicamento" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+            <select
+              v-model="tempMedicamento"
+              class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+            >
               <option value="" disabled>Seleccione...</option>
-              <option 
-                v-for="med in medicamentos.filter(m => m.nombre !== 'Ninguno' && !salud.medicamentos.includes(m.id))" 
-                :key="med.id" 
+              <option
+                v-for="med in medicamentos.filter(
+                  (m) => m.nombre !== 'Ninguno' && !salud.medicamentos.includes(m.id),
+                )"
+                :key="med.id"
                 :value="med.id"
               >
                 {{ med.nombre }}
               </option>
             </select>
-            <button @click="agregarSalud('medicamento')" type="button" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium transition duration-150 ease-in-out">
+            <button
+              @click="agregarSalud('medicamento')"
+              type="button"
+              class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium transition duration-150 ease-in-out"
+            >
               Agregar
             </button>
           </div>
           <div class="flex flex-wrap gap-2 min-h-[32px]">
-            <span 
-              v-for="idMed in salud.medicamentos" 
-              :key="idMed" 
+            <span
+              v-for="idMed in salud.medicamentos"
+              :key="idMed"
               class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
             >
-              {{ medicamentos.find(m => m.id === idMed)?.nombre }}
-              <button @click="eliminarSalud('medicamento', idMed)" type="button" class="ml-2 inline-flex text-blue-400 hover:text-blue-600 focus:outline-none">
+              {{ medicamentos.find((m) => m.id === idMed)?.nombre }}
+              <button
+                @click="eliminarSalud('medicamento', idMed)"
+                type="button"
+                class="ml-2 inline-flex text-blue-400 hover:text-blue-600 focus:outline-none"
+              >
                 <i class="pi pi-times text-[10px]"></i>
               </button>
             </span>
           </div>
-        </div>  
+        </div>
+
       </div>
     </div>
   </div>

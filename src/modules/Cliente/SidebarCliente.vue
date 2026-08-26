@@ -8,7 +8,7 @@ const props = defineProps({
   },
   matriculaEstado: {
     type: String,
-    default: "pendiente",
+    default: "aprobada",
   },
 });
 
@@ -18,7 +18,6 @@ const isMobile = () => window.innerWidth < 768;
 
 const handleMenuClick = () => {
   if (!props.open) return;
-
   if (isMobile()) {
     emit("close");
   }
@@ -26,7 +25,6 @@ const handleMenuClick = () => {
 
 const handleNavClick = () => {
   if (!props.open) return;
-
   if (isMobile()) {
     emit("close");
   }
@@ -37,7 +35,6 @@ const menuItems = computed(() => {
     { title: "Inicio", to: "/cliente/dashboard", icon: "pi pi-home" },
   ];
 
-  // Menú condicional según el estado de matrícula
   if (props.matriculaEstado === "pendiente") {
     items.push({
       title: "Registro de Estudiante",
@@ -82,11 +79,11 @@ const menuItems = computed(() => {
 
     <aside
       :class="[
-        'bg-white text-black min-h-screen transition-all duration-300 fixed inset-y-0 left-0 z-40',
+        'bg-white text-black min-h-screen transition-all duration-300 fixed inset-y-0 left-0 z-40 flex flex-col',
         open ? 'w-64 translate-x-0' : 'w-0 -translate-x-full overflow-hidden',
       ]"
     >
-      <!-- Header -->
+      <!-- Header del Sidebar -->
       <div class="p-6 border-b border-gray-200">
         <div class="bg-blue-900 flex items-center gap-2 drop-shadow p-2 rounded-xl">
           <i class="pi pi-graduation-cap text-white"></i>
@@ -94,8 +91,8 @@ const menuItems = computed(() => {
         </div>
       </div>
 
-      <!-- Navegación -->
-      <nav class="mt-4 flex flex-col text-sm">
+      <!-- Navegación Principal -->
+      <nav class="mt-4 flex-1 overflow-y-auto flex flex-col text-sm px-2">
         <router-link
           v-for="item in menuItems"
           :key="item.to"
@@ -103,18 +100,32 @@ const menuItems = computed(() => {
           class="menu-item"
           @click="handleNavClick"
         >
-          <div class="bg-white drop-shadow p-2 rounded-full">
+          <div class="bg-white drop-shadow p-2 rounded-full flex items-center justify-center">
             <i :class="item.icon + ' text-blue-500'"></i>
           </div>
           {{ item.title }}
         </router-link>
       </nav>
 
-      <!-- Footer -->
-      <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-        <router-link to="/" class="menu-item text-red-400 hover:bg-red-50" @click="handleNavClick">
-          <i class="pi pi-sign-out"></i>
-          Cerrar Sesión
+      <!-- Footer del Sidebar (Perfil de Encargado y Salida) -->
+      <div class="mt-auto p-4 border-t border-gray-200 flex items-center justify-between bg-gray-50/50">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <div class="w-10 h-10 rounded-full bg-[#1e3a8a] text-white flex items-center justify-center font-bold text-sm shadow-sm select-none shrink-0">
+            E
+          </div>
+          <div class="overflow-hidden">
+            <p class="text-xs font-bold text-gray-900 truncate">Elena Ruiz</p>
+            <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Encargado</p>
+          </div>
+        </div>
+
+        <router-link 
+          to="/login" 
+          class="w-9 h-9 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors shrink-0"
+          title="Cerrar Sesión"
+          @click="handleNavClick"
+        >
+          <i class="pi pi-sign-out text-sm"></i>
         </router-link>
       </div>
     </aside>

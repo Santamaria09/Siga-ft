@@ -87,6 +87,33 @@ const alCambiarDistrito = () => {
   }
 };
 
+// --- NUEVAS VARIABLES Y FUNCIONES PARA EL BUSCADOR DE DISTRITOS ---
+const busquedaDistrito = ref("");
+const mostrarDropdownDistrito = ref(false);
+
+const distritosFiltrados = computed(() => {
+  if (!busquedaDistrito.value) return todosLosDistritos.value;
+  const busqueda = busquedaDistrito.value.toLowerCase();
+  return todosLosDistritos.value.filter(d => 
+    d.nombre.toLowerCase().includes(busqueda)
+  );
+});
+
+const seleccionarDistrito = (distrito) => {
+  estudiante.value.distrito_id = distrito.id;
+  busquedaDistrito.value = distrito.nombre; // Ponemos el nombre en el input
+  mostrarDropdownDistrito.value = false; // Ocultamos la lista
+  alCambiarDistrito(); // Llenamos Municipio y Depto automáticamente
+};
+
+const verificarInputDistrito = () => {
+  if (busquedaDistrito.value === "") {
+    estudiante.value.distrito_id = null;
+    alCambiarDistrito();
+  }
+};
+// -----------------------------------------------------------------
+
 const padreDesconocido = ref(false);
 const madreDesconocida = ref(false);
 
@@ -161,19 +188,6 @@ const cancelar = () => {
         />
       </div>
 
-      <!-- NIE -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          NIE
-        </label>
-        <input
-          v-model="estudiante.nie"
-          type="text"
-          class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          placeholder="Ingrese el NIE"
-        />
-      </div>
-
       <!-- Género -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-3">
@@ -207,25 +221,42 @@ const cancelar = () => {
         </h3>
         <div class="grid md:grid-cols-3 gap-4">
           
-          <!-- 1. Distrito (Primero en la línea) -->
-          <div>
+          <!-- 1. Distrito (Buscador Inteligente) -->
+          <div class="relative">
             <label class="block text-sm text-gray-600 mb-1">
               Distrito
             </label>
-            <select
-              v-model="estudiante.distrito_id"
-              @change="alCambiarDistrito"
-              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            <div class="relative">
+              <input
+                type="text"
+                v-model="busquedaDistrito"
+                @focus="mostrarDropdownDistrito = true"
+                @blur="setTimeout(() => mostrarDropdownDistrito = false, 200)"
+                @input="verificarInputDistrito"
+                placeholder="Buscar distrito..."
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none pr-10"
+              />
+              <i class="pi pi-search absolute right-3 top-3 text-gray-400"></i>
+            </div>
+            
+            <!-- Lista desplegable flotante -->
+            <ul
+              v-if="mostrarDropdownDistrito"
+              class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-48 overflow-y-auto"
             >
-              <option :value="null">Seleccione...</option>
-              <option
-                v-for="distrito in todosLosDistritos"
+              <li
+                v-for="distrito in distritosFiltrados"
                 :key="distrito.id"
-                :value="distrito.id"
+                @click="seleccionarDistrito(distrito)"
+                class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm text-gray-700 transition"
               >
                 {{ distrito.nombre }}
-              </option>
-            </select>
+              </li>
+              
+              <li v-if="distritosFiltrados.length === 0" class="px-4 py-3 text-sm text-gray-500 text-center">
+                No se encontraron resultados
+              </li>
+            </ul>
           </div>
 
           <!-- 2. Municipio (Read-only / Autocompletado) -->

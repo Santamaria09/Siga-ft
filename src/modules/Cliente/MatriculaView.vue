@@ -7,8 +7,9 @@ import SidebarCliente from "./SidebarCliente.vue";
 import SelectorTipoMatricula from "./SelectorTipoMatricula.vue";
 import BusquedaEstudiante from "./BusquedaEstudiante.vue";
 import FichaDatosAcademicos from "./FichaDatosAcademicos.vue";
-import FichaEncargadoNuevo from "./FichaEncargadoNuevo.vue";
-import FichaEncargadoAntiguo from "./FichaEncargadoAntiguo.vue";
+
+// IMPORTACIÓN CORREGIDA: Apuntando exactamente a tu archivo orquestador
+import FichaEncargado from "./FichaEncargado.vue";
 
 const router = useRouter();
 const uiStore = useUiStore();
@@ -36,7 +37,6 @@ const toggleSidebar = () => {
 };
 
 const cancelarTodo = () => {
-  // CORRECCIÓN DIRECTA: Llama a la acción del store que limpia todo el estado global de matrícula
   matriculaStore.resetearTodo();
 };
 
@@ -67,10 +67,10 @@ const confirmarMatricula = async () => {
   try {
     console.log("Enviando matrícula:", payload);
     Swal.fire({
-  title: "Good job!",
-  text: "You clicked the button!",
-  icon: "success"
-});
+      title: "Good job!",
+      text: "You clicked the button!",
+      icon: "success"
+    });
     matriculaStore.resetearTodo();
     router.push("/cliente/registro");
   } catch {
@@ -123,7 +123,7 @@ const confirmarMatricula = async () => {
           <SelectorTipoMatricula v-if="!tipoMatricula" />
 
           <!-- PASO 1 (Antiguo): BÚSQUEDA DE ESTUDIANTE -->
-          <BusquedaEstudiante v-else-if="pasoAntiguo === 'busqueda'" />
+          <BusquedaEstudiante v-else-if="esAntiguoIngreso && pasoAntiguo === 'busqueda'" />
 
           <!-- PASO 1+: FORMULARIO DE MATRÍCULA -->
           <div v-else class="animate-fade-in">
@@ -157,9 +157,8 @@ const confirmarMatricula = async () => {
 
               <!-- TAB: Encargado -->
               <div v-if="pestañaActiva === 'encar'" class="animate-fade-in max-w-3xl mx-auto">
-                <FichaEncargadoAntiguo v-if="estudianteSeleccionado" />
-
-                <FichaEncargadoNuevo v-else />
+                <!-- VISTA LIMPIA: Llamamos a tu componente orquestador -->
+                <FichaEncargado />
               </div>
             </div>
           </div>

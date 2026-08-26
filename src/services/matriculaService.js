@@ -1,4 +1,7 @@
 import api from './api';
+import baseService from './baseService';
+
+const matriculaCrud = baseService('/matriculas');
 
 const mockCatalogos = {
     grados: [
@@ -18,18 +21,18 @@ const mockCatalogos = {
 const mockBusqueda = [
     { id: 10, nombres: "Juan Perez", NIE: "12345678", padre: { id: 5, nombre: "Carlos Perez", dui: "00000000-0" } }
 ];
-
-// Cambiar a 'false' cuando el backend de Laravel esté listo
 const USE_MOCK = true; 
 
 export const matriculaService = {
+    
+    ...matriculaCrud, 
+
     async obtenerCatalogos() {
         if (USE_MOCK) {
             return new Promise(resolve => setTimeout(() => resolve({ 
                 data: mockCatalogos 
             }), 300));
         }
-        // Cuando Laravel esté listo, esto se ejecutará:
         const [resGrados, resTurnos, resParentescos] = await Promise.all([
             api.get("/grados"),
             api.get("/turnos"),
@@ -48,10 +51,7 @@ export const matriculaService = {
 
     async enviarMatricula(formData) {
         if (USE_MOCK) {
-            console.log("Simulando envío a Laravel. Datos del FormData:");
-            for (let [key, value] of formData.entries()) {
-                console.log(`${key}:`, value);
-            }
+            console.log("Simulando envío a Laravel...");
             return new Promise(resolve => setTimeout(() => resolve({ data: { message: "Matrícula exitosa" } }), 800));
         }
         return await api.post("/matriculas", formData, {

@@ -1,10 +1,11 @@
 <script setup>
 import { storeToRefs } from "pinia";
 import { useMatriculaStore } from "@/stores/matricula";
-import FichaEncargadoNuevo from "./FichaEncargadoNuevo.vue";
+import FichaEncargadoNuevo from "./FormularioEncargado.vue";
 
 const matriculaStore = useMatriculaStore();
 const {
+  esNuevoIngreso,
   encargadoSeleccionado,
   encargadoManual,
   encargadosDisponibles,
@@ -13,8 +14,9 @@ const {
 
 <template>
   <div class="animate-fade-in max-w-3xl mx-auto">
-    <!-- Selector de encargado existente -->
-    <div v-if="!encargadoManual" class="space-y-6">
+    
+    <!-- CASO 1: ES ANTIGUO INGRESO Y NO ESTÁ AGREGANDO UNO MANUALMENTE -->
+    <div v-if="!esNuevoIngreso && !encargadoManual" class="space-y-6">
       <h3 class="text-lg font-semibold text-gray-800">
         Seleccionar Responsable
       </h3>
@@ -73,14 +75,15 @@ const {
       </div>
     </div>
 
-    <!-- Formulario manual de encargado (reutiliza FichaEncargadoNuevo) -->
+    <!-- CASO 2: ES NUEVO INGRESO (Directo al form) o ANTIGUO AGREGANDO MANUALMENTE -->
     <div v-else class="space-y-6">
       <div class="flex items-center justify-between">
         <h3 class="text-lg font-semibold text-gray-800">
-          Agregar Encargado
+          {{ esNuevoIngreso ? 'Datos del Responsable' : 'Agregar Encargado' }}
         </h3>
         
         <button
+          v-if="!esNuevoIngreso"
           @click="encargadoManual = false; matriculaStore.resetFormularioEncargado()"
           type="button"
           class="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
