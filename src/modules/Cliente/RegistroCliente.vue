@@ -3,8 +3,6 @@ import { ref, computed } from "vue";
 
 const emit = defineEmits(["cerrar", "save"]);
 
-// NOTA: Idealmente estos catálogos deben cargarse desde la API 
-// para asegurar que los IDs coincidan con la base de datos.
 const listaDepartamentos = ref([
   { id: 1, nombre: "Chalatenango" },
   { id: 2, nombre: "San Salvador" }
@@ -130,18 +128,6 @@ const madre = ref({
   dui: "",
   correo: ""
 });
-
-const togglePadreDesconocido = () => {
-  if (padreDesconocido.value) {
-    padre.value = { nombre: "", telefono: "", dui: "", correo: "" };
-  }
-};
-
-const toggleMadreDesconocida = () => {
-  if (madreDesconocida.value) {
-    madre.value = { nombre: "", telefono: "", dui: "", correo: "" };
-  }
-};
 
 const guardarEstudiante = () => {
   if (
@@ -356,146 +342,67 @@ const cancelar = () => {
       </div>
 
       <!-- Información de los padres -->
-      <div class="border-t pt-6">
-        <h3 class="text-sm font-semibold text-gray-700 mb-4">
+      <div class="border-t pt-6 mt-6">
+        <h3 class="text-sm font-semibold text-gray-700 mb-4 flex justify-between items-center">
           Información de los padres
         </h3>
 
         <!-- Padre -->
-        <div class="border rounded-lg p-4 space-y-4">
-          <div class="flex items-center gap-2">
+        <div class="border rounded-xl p-5 mb-4 bg-gray-50/50">
+          <div class="flex items-center gap-2 mb-4">
             <input
               type="checkbox"
               id="padreDesconocido"
               v-model="padreDesconocido"
-              @change="togglePadreDesconocido"
+              class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
             />
-            <label for="padreDesconocido" class="text-sm font-medium text-gray-700 cursor-pointer">
+            <label for="padreDesconocido" class="text-sm font-bold text-gray-700 cursor-pointer">
               Padre desconocido
             </label>
           </div>
 
-          <div class="space-y-3">
-            <div>
-              <label class="block text-sm text-gray-600 mb-1">
-                Nombre
-              </label>
-              <input
-                v-model="padre.nombre"
-                :disabled="padreDesconocido"
-                type="text"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                placeholder="Nombre del padre"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm text-gray-600 mb-1">
-                Teléfono
-              </label>
-              <input
-                v-model="padre.telefono"
-                :disabled="padreDesconocido"
-                type="text"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                placeholder="Teléfono del padre"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm text-gray-600 mb-1">
-                DUI
-              </label>
-              <input
-                v-model="padre.dui"
-                :disabled="padreDesconocido"
-                type="text"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                placeholder="DUI del padre"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm text-gray-600 mb-1">
-                Correo electrónico
-              </label>
-              <input
-                v-model="padre.correo"
-                :disabled="padreDesconocido"
-                type="email"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                placeholder="Correo del padre"
-              />
-            </div>
+          <div v-if="!padreDesconocido" class="animate-fade-in">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Seleccionar Padre
+            </label>
+            <select
+              v-model="estudiante.padre_id"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white shadow-sm"
+            >
+              <option :value="null">Seleccione un padre de la lista...</option>
+              <!-- Idealmente esto vendrá de tu Pinia Store -->
+              <option value="1">Juan Méndez (12345678-9)</option>
+              <option value="2">Carlos Ruiz (98765432-1)</option>
+            </select>
           </div>
         </div>
 
         <!-- Madre -->
-        <div class="border rounded-lg p-4 space-y-4 mt-4">
-          <div class="flex items-center gap-2">
+        <div class="border rounded-xl p-5 bg-gray-50/50">
+          <div class="flex items-center gap-2 mb-4">
             <input
               type="checkbox"
               id="madreDesconocida"
               v-model="madreDesconocida"
-              @change="toggleMadreDesconocida"
+              class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
             />
-            <label for="madreDesconocida" class="text-sm font-medium text-gray-700 cursor-pointer">
+            <label for="madreDesconocida" class="text-sm font-bold text-gray-700 cursor-pointer">
               Madre desconocida
             </label>
           </div>
 
-          <div class="space-y-3">
-            <div>
-              <label class="block text-sm text-gray-600 mb-1">
-                Nombre
-              </label>
-              <input
-                v-model="madre.nombre"
-                :disabled="madreDesconocida"
-                type="text"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                placeholder="Nombre de la madre"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm text-gray-600 mb-1">
-                Teléfono
-              </label>
-              <input
-                v-model="madre.telefono"
-                :disabled="madreDesconocida"
-                type="text"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                placeholder="Teléfono de la madre"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm text-gray-600 mb-1">
-                DUI
-              </label>
-              <input
-                v-model="madre.dui"
-                :disabled="madreDesconocida"
-                type="text"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                placeholder="DUI de la madre"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm text-gray-600 mb-1">
-                Correo electrónico
-              </label>
-              <input
-                v-model="madre.correo"
-                :disabled="madreDesconocida"
-                type="email"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                placeholder="Correo de la madre"
-              />
-            </div>
+          <div v-if="!madreDesconocida" class="animate-fade-in">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Seleccionar Madre
+            </label>
+            <select
+              v-model="estudiante.madre_id"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white shadow-sm"
+            >
+              <option :value="null">Seleccione una madre de la lista...</option>
+              <option value="3">Ana Méndez (11223344-5)</option>
+              <option value="4">Elena Torres (55667788-9)</option>
+            </select>
           </div>
         </div>
       </div>
