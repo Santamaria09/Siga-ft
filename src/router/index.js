@@ -64,6 +64,11 @@ const router = createRouter({
       component: () => import('../modules/Cliente/AsignaturasCliente.vue'),
     },
     {
+      path: '/cliente/padres',
+      name: 'registro-padres',
+      component: () => import('../modules/Cliente/RegistroPadres.vue'),
+    },
+    {
       path: '/cliente/avisos',
       name: 'avisos-cliente',
       component: () => import('../modules/Cliente/AvisosCliente.vue'),

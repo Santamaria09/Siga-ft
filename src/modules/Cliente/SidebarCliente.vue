@@ -8,7 +8,7 @@ const props = defineProps({
   },
   matriculaEstado: {
     type: String,
-    default: "aprobada",
+    default: "pendiente",
   },
 });
 
@@ -41,6 +41,11 @@ const menuItems = computed(() => {
       to: "/cliente/registro",
       icon: "pi pi-user-plus",
     });
+    items.push({
+     title: "Registro de Padres",
+     to: "/cliente/padres", 
+     icon: "pi pi-users",
+   });
     items.push({
       title: "Solicitud de Matrícula",
       to: "/cliente/matricula",
