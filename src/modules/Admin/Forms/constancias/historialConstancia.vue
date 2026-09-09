@@ -1,14 +1,9 @@
 <script setup>
 import { ref } from "vue";
-import { storeToRefs } from "pinia";
-import { useUiStore } from "@/stores/ui";
-import SidebarAdmin from "@/modules/Admin/SidebarAdmin.vue";
 import Constancia from "./Constancia.vue";
 import constanciaPDF from "./constanciaPDF.vue";
 import egresadoPDF from "./egresadoPDF.vue";
 
-const uiStore = useUiStore();
-const { sidebarOpen } = storeToRefs(uiStore);
 const mostrarConstancia = ref(false);
 const mostrarConducta = ref(false);
 const mostrarEgresado = ref(false);
@@ -23,33 +18,15 @@ const cerrarConstancia = () => {
 const cerrarConducta = () => {
   mostrarConducta.value = false;
 };
-
-const toggleSidebar = () => {
-  uiStore.toggleSidebar();
-};
 </script>
 
 <template>
   <div class="relative min-h-screen bg-slate-100 md:flex">
-    <SidebarAdmin :open="sidebarOpen" @close="uiStore.setSidebarOpen(false)" />
-
-    <main :class="['flex-1 transition-all duration-300', sidebarOpen ? 'md:ml-64 ml-0' : 'ml-0']">
-      <!-- HEADER -->
+    <main class="flex-1 transition-all duration-300">
       <header class="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
         <div class="px-6 py-4 flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            <button
-              @click="toggleSidebar"
-              class="p-2 bg-transparent border border-transparent rounded-xl"
-            >
-              <i
-                :class="['text-xl text-slate-600', sidebarOpen ? 'pi pi-times' : 'pi pi-bars']"
-              ></i>
-            </button>
-
-            <div>
-              <h1 class="text-xl font-bold text-slate-800">Constancias Académicas</h1>
-            </div>
+          <div>
+            <h1 class="text-xl font-bold text-slate-800">Constancias Académicas</h1>
           </div>
         </div>
       </header>

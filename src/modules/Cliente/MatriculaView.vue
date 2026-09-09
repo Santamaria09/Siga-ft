@@ -1,9 +1,7 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
-import { useUiStore } from "@/stores/ui";
 import { useMatriculaStore } from "@/stores/matricula";
-import SidebarCliente from "./SidebarCliente.vue";
 import SelectorTipoMatricula from "./SelectorTipoMatricula.vue";
 import BusquedaEstudiante from "./BusquedaEstudiante.vue";
 import FichaDatosAcademicos from "./FichaDatosAcademicos.vue";
@@ -12,8 +10,6 @@ import FichaDatosAcademicos from "./FichaDatosAcademicos.vue";
 import FichaEncargado from "./FichaEncargado.vue";
 
 const router = useRouter();
-const uiStore = useUiStore();
-const { sidebarOpen } = storeToRefs(uiStore);
 
 const matriculaStore = useMatriculaStore();
 const {
@@ -31,10 +27,6 @@ const estiloTab = (pest) =>
   pestañaActiva.value === pest
     ? "border-blue-600 text-blue-600 font-bold bg-blue-50/50"
     : "border-transparent text-gray-500 hover:text-gray-750 hover:bg-gray-50";
-
-const toggleSidebar = () => {
-  uiStore.setSidebarOpen(!sidebarOpen.value);
-};
 
 const cancelarTodo = () => {
   matriculaStore.resetearTodo();
@@ -69,7 +61,7 @@ const confirmarMatricula = async () => {
     Swal.fire({
       title: "Good job!",
       text: "You clicked the button!",
-      icon: "success"
+      icon: "success",
     });
     matriculaStore.resetearTodo();
     router.push("/cliente/registro");
@@ -81,28 +73,11 @@ const confirmarMatricula = async () => {
 
 <template>
   <div class="relative min-h-screen bg-gray-100 md:flex">
-    <SidebarCliente
-      :open="sidebarOpen"
-      :matriculaEstado="estadoMatricula"
-      @close="uiStore.setSidebarOpen(false)"
-    />
-
-    <main
-      :class="[
-        'flex-1 transition-all duration-300 flex flex-col',
-        sidebarOpen ? 'md:ml-64' : 'ml-0',
-      ]"
-    >
+    <main class="flex-1 transition-all duration-300 flex flex-col">
       <!-- Header -->
       <div class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
         <div class="px-6 py-4 flex items-center justify-between">
           <div class="flex items-center gap-4">
-            <button
-              @click="toggleSidebar"
-              class="p-2 rounded-lg border border-transparent bg-white hover:bg-gray-100 transition text-gray-600"
-            >
-              <i :class="['text-xl transition', sidebarOpen ? 'pi pi-times' : 'pi pi-bars']"></i>
-            </button>
             <div>
               <h1 class="text-3xl font-bold text-gray-800">Ficha de Matrícula</h1>
             </div>
@@ -181,8 +156,7 @@ const confirmarMatricula = async () => {
         </div>
         <button
           v-if="
-            (esNuevoIngreso && tipoMatricula) ||
-            (esAntiguoIngreso && pasoAntiguo === 'formulario')
+            (esNuevoIngreso && tipoMatricula) || (esAntiguoIngreso && pasoAntiguo === 'formulario')
           "
           @click="confirmarMatricula"
           type="button"
@@ -193,12 +167,6 @@ const confirmarMatricula = async () => {
         </button>
       </div>
     </main>
-
-    <div
-      v-if="sidebarOpen"
-      @click="toggleSidebar"
-      class="md:hidden fixed inset-0 bg-black/30 z-20"
-    ></div>
   </div>
 </template>
 

@@ -1,16 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import { storeToRefs } from "pinia";
-import { useUiStore } from "@/stores/ui";
-import SidebarCliente from "./SidebarCliente.vue";
 import RegistroCliente from "./RegistroCliente.vue";
-
-const uiStore = useUiStore();
-const { sidebarOpen } = storeToRefs(uiStore);
-
-const toggleSidebar = () => {
-  uiStore.toggleSidebar();
-};
 
 const padre = ref({
   nombre: "Elena Ruiz",
@@ -48,20 +38,11 @@ const matricular = (hijo) => {
 
 <template>
   <div class="min-h-screen bg-gray-50">
-    <SidebarCliente :open="sidebarOpen" @close="uiStore.setSidebarOpen(false)" />
-
-    <main :class="['transition-all duration-300', sidebarOpen ? 'md:ml-64' : 'ml-0']">
+    <main class="transition-all duration-300">
       <div v-if="!abrirRegistro" class="p-6">
         <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
           <div class="px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-4">
-              <button
-                @click="toggleSidebar"
-                class="p-2 rounded-lg bg-white text-gray-600 hover:bg-gray-100 transition"
-              >
-                <i :class="['text-xl', sidebarOpen ? 'pi pi-times' : 'pi pi-bars']"></i>
-              </button>
-
               <h1 class="text-xl font-bold text-gray-800">Registro</h1>
             </div>
           </div>

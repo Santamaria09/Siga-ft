@@ -1,16 +1,10 @@
 <script setup>
 import { ref, computed } from "vue";
-import { storeToRefs } from "pinia";
-import { useUiStore } from "@/stores/ui";
-import SidebarCliente from "./SidebarCliente.vue";
-
-const uiStore = useUiStore();
-const { sidebarOpen } = storeToRefs(uiStore);
 
 // --- ESTADOS DE LA VISTA ---
 const selectedTrimestre = ref("1");
-const vistaActiva = ref("calificaciones"); 
-const nombreEncargado = ref("Elena Ruiz"); 
+const vistaActiva = ref("calificaciones");
+const nombreEncargado = ref("Elena Ruiz");
 
 const hijos = ref([
   {
@@ -31,8 +25,8 @@ const hijos = ref([
 
 // Manejo del estudiante seleccionado
 const hijoSeleccionadoId = ref(hijos.value[0].id);
-const hijoSeleccionado = computed(() => 
-  hijos.value.find(h => h.id === hijoSeleccionadoId.value) || hijos.value[0]
+const hijoSeleccionado = computed(
+  () => hijos.value.find((h) => h.id === hijoSeleccionadoId.value) || hijos.value[0],
 );
 
 // --- TABLAS DE DATOS ---
@@ -124,28 +118,14 @@ const getConductaClass = (calificacion) => {
     }[calificacion] || "bg-gray-100 text-gray-700"
   );
 };
-
-const toggleSidebar = () => {
-  sidebarOpen.value = !sidebarOpen.value;
-};
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-50">
-    <SidebarCliente :open="sidebarOpen" @close="uiStore.setSidebarOpen(false)" />
-
-    <main :class="['transition-all duration-300 flex flex-col', sidebarOpen ? 'md:ml-64' : 'ml-0']">
-      
-      <!-- HEADER SOLO CON NOMBRE DEL ENCARGADO -->
+    <main class="transition-all duration-300 flex flex-col">
       <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
         <div class="px-6 py-4 flex items-center justify-between">
           <div class="flex items-center gap-4">
-            <button
-              @click="toggleSidebar"
-              class="p-2 rounded-lg border border-transparent bg-white hover:bg-gray-100 transition text-gray-600"
-            >
-              <i :class="['text-xl', sidebarOpen ? 'pi pi-times' : 'pi pi-bars']"></i>
-            </button>
             <h1 class="text-xl font-bold text-gray-800">Libreta de Notas</h1>
           </div>
         </div>
@@ -153,10 +133,8 @@ const toggleSidebar = () => {
 
       <!-- CONTENIDO PRINCIPAL -->
       <div class="p-6 lg:p-8 flex-1">
-        
         <!-- PESTAÑAS Y SELECTORES -->
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
-          
           <!-- Lado Izquierdo: Pestañas -->
           <div class="flex gap-3 w-full lg:w-auto">
             <button
@@ -165,7 +143,7 @@ const toggleSidebar = () => {
                 'flex-1 lg:flex-none px-6 py-2.5 rounded-xl font-bold transition flex items-center gap-2 justify-center text-sm border',
                 vistaActiva === 'calificaciones'
                   ? 'bg-blue-900 text-white border-blue-900 shadow-md'
-                  : 'bg-white border-gray-200 text-gray-600 hover:border-gray-400'
+                  : 'bg-white border-gray-200 text-gray-600 hover:border-gray-400',
               ]"
             >
               <i class="pi pi-book"></i> Calificaciones
@@ -177,7 +155,7 @@ const toggleSidebar = () => {
                 'flex-1 lg:flex-none px-6 py-2.5 rounded-xl font-bold transition flex items-center gap-2 justify-center text-sm border',
                 vistaActiva === 'conducta'
                   ? 'bg-blue-900 text-white border-blue-900 shadow-md'
-                  : 'bg-white border-gray-200 text-gray-600 hover:border-gray-400'
+                  : 'bg-white border-gray-200 text-gray-600 hover:border-gray-400',
               ]"
             >
               <i class="pi pi-users"></i> Conducta
@@ -186,22 +164,23 @@ const toggleSidebar = () => {
 
           <!-- Lado Derecho: Selector de Estudiante + Trimestre -->
           <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
-            
             <!-- Selector de Estudiante -->
             <div class="relative w-full sm:w-80">
-            <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-600">
-              <i class="pi pi-user text-sm"></i>
+              <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-600">
+                <i class="pi pi-user text-sm"></i>
+              </div>
+              <select
+                v-model="hijoSeleccionadoId"
+                class="w-full bg-gray-50 border border-gray-200 text-gray-800 font-bold text-sm rounded-xl pl-10 pr-10 py-3 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white cursor-pointer appearance-none transition"
+              >
+                <option v-for="hijo in hijos" :key="hijo.id" :value="hijo.id">
+                  {{ hijo.nombre }} ({{ hijo.grado }})
+                </option>
+              </select>
+              <i
+                class="pi pi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none"
+              ></i>
             </div>
-            <select 
-              v-model="hijoSeleccionadoId" 
-              class="w-full bg-gray-50 border border-gray-200 text-gray-800 font-bold text-sm rounded-xl pl-10 pr-10 py-3 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white cursor-pointer appearance-none transition"
-            >
-              <option v-for="hijo in hijos" :key="hijo.id" :value="hijo.id">
-                {{ hijo.nombre }} ({{ hijo.grado }})
-              </option>
-            </select>
-            <i class="pi pi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none"></i>
-          </div>
 
             <!-- Selector de Trimestre -->
             <select
@@ -212,7 +191,6 @@ const toggleSidebar = () => {
               <option value="2">Trimestre 2</option>
               <option value="3">Trimestre 3</option>
             </select>
-            
           </div>
         </div>
 
@@ -248,9 +226,15 @@ const toggleSidebar = () => {
                       <p class="font-bold text-gray-800">{{ calificacion.asignatura }}</p>
                       <p class="text-xs text-gray-500">{{ calificacion.profesor }}</p>
                     </td>
-                    <td class="px-6 py-4 text-center text-gray-600 font-medium">{{ calificacion.nota1 }}</td>
-                    <td class="px-6 py-4 text-center text-gray-600 font-medium">{{ calificacion.nota2 }}</td>
-                    <td class="px-6 py-4 text-center text-gray-600 font-medium">{{ calificacion.nota3 }}</td>
+                    <td class="px-6 py-4 text-center text-gray-600 font-medium">
+                      {{ calificacion.nota1 }}
+                    </td>
+                    <td class="px-6 py-4 text-center text-gray-600 font-medium">
+                      {{ calificacion.nota2 }}
+                    </td>
+                    <td class="px-6 py-4 text-center text-gray-600 font-medium">
+                      {{ calificacion.nota3 }}
+                    </td>
                     <td class="px-6 py-4 text-center font-bold text-blue-600 text-lg">
                       {{ calificacion.promedio }}
                     </td>
@@ -310,15 +294,8 @@ const toggleSidebar = () => {
             </div>
           </div>
         </div>
-
       </div>
     </main>
-
-    <div
-      v-if="sidebarOpen"
-      @click="toggleSidebar"
-      class="md:hidden fixed inset-0 bg-black/40 z-20 backdrop-blur-sm transition-opacity"
-    ></div>
   </div>
 </template>
 

@@ -1,49 +1,20 @@
 <script setup>
 import { ref } from "vue";
-import { storeToRefs } from "pinia";
-import { useUiStore } from "@/stores/ui";
-import SidebarAdmin from "./SidebarAdmin.vue";
 
-const uiStore = useUiStore();
-const { sidebarOpen } = storeToRefs(uiStore);
 const adminName = ref("Ing. Juan Pérez");
-
-const toggleSidebar = () => {
-  uiStore.toggleSidebar();
-};
 </script>
 
 <template>
   <div class="relative min-h-screen bg-gray-50 md:flex">
-    <SidebarAdmin :open="sidebarOpen" @close="uiStore.setSidebarOpen(false)" />
-
-    <main
-      :class="[
-        'flex-1 transition-all duration-300 bg-slate-100',
-        sidebarOpen ? 'md:ml-64 ml-0' : 'ml-0',
-      ]"
-    >
-      <!-- Header -->
+    <main class="flex-1 transition-all duration-300 bg-slate-100">
       <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
         <div class="px-6 py-3 flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            <button
-              @click="toggleSidebar"
-              class="p-2 rounded-lg border border-transparent bg-white hover:bg-gray-100 transition text-gray-600"
-            >
-              <i :class="['text-xl', sidebarOpen ? 'pi pi-times' : 'pi pi-bars']"></i>
-            </button>
-
-            <div>
-              <h2 class="font-semibold text-gray-800">Panel Administrativo</h2>
-            </div>
+          <div>
+            <h2 class="font-semibold text-gray-800">Panel Administrativo</h2>
           </div>
-
-          <div class="flex items-center gap-4"></div>
         </div>
       </header>
 
-      <!-- Dashboard -->
       <div class="p-6">
         <!-- Título -->
         <div class="mb-8">
@@ -237,7 +208,8 @@ const toggleSidebar = () => {
                 <p class="mt-3 text-sm font-medium text-gray-700">Estudiantes</p>
               </div>
 
-\              <div class="flex flex-col items-center">
+              \
+              <div class="flex flex-col items-center">
                 <div class="relative w-28 h-28">
                   <svg class="w-28 h-28 -rotate-90">
                     <circle cx="56" cy="56" r="46" stroke="#E5E7EB" stroke-width="6" fill="none" />
@@ -366,11 +338,5 @@ const toggleSidebar = () => {
         </div>
       </div>
     </main>
-
-    <div
-      v-if="sidebarOpen"
-      @click="toggleSidebar"
-      class="md:hidden fixed inset-0 bg-black/30 z-35"
-    ></div>
   </div>
 </template>

@@ -1,15 +1,8 @@
 <script setup>
 import { ref } from "vue";
-import { storeToRefs } from "pinia";
-import { useUiStore } from "@/stores/ui";
-import SidebarAdmin from "@/modules/Admin/SidebarAdmin.vue";
 import Asignacion from "@/modules/Admin/Forms/Asignaciones.vue";
 
-const uiStore = useUiStore();
-const { sidebarOpen } = storeToRefs(uiStore);
 const mostrarAsignacion = ref(false);
-
-const toggleSidebar = () => uiStore.toggleSidebar();
 
 const abrirAsignacion = () => {
   mostrarAsignacion.value = true;
@@ -22,27 +15,13 @@ const cerrarAsignacion = () => {
 
 <template>
   <div class="relative min-h-screen bg-slate-100 md:flex">
-    <SidebarAdmin :open="sidebarOpen" @close="sidebarOpen = false" />
-
-    <main :class="['flex-1 transition-all duration-300', sidebarOpen ? 'md:ml-64 ml-0' : 'ml-0']">
-      <!-- HEADER -->
+    <main class="flex-1 transition-all duration-300">
       <header class="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
         <div class="px-6 py-4 flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            <button
-              @click="toggleSidebar"
-              class="p-2 bg-transparent border border-transparent rounded-xl"
-            >
-              <i
-                :class="['text-xl text-slate-600', sidebarOpen ? 'pi pi-times' : 'pi pi-bars']"
-              ></i>
-            </button>
+          <div>
+            <h1 class="text-xl font-bold text-slate-800">Asignaciones Académicas</h1>
 
-            <div>
-              <h1 class="text-xl font-bold text-slate-800">Asignaciones Académicas</h1>
-
-              <p class="text-sm text-slate-500">Gestión de asignaciones de docentes</p>
-            </div>
+            <p class="text-sm text-slate-500">Gestión de asignaciones de docentes</p>
           </div>
         </div>
       </header>

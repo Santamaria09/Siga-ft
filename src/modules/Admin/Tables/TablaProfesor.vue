@@ -1,18 +1,9 @@
 <script setup>
 import { computed, ref } from "vue";
-import { storeToRefs } from "pinia";
-import { useUiStore } from "@/stores/ui";
-import SidebarAdmin from "../SidebarAdmin.vue";
 import FormProfesores from "../Forms/Profesores.vue";
 
-const uiStore = useUiStore();
-const { sidebarOpen } = storeToRefs(uiStore);
 const activeSection = ref("Profesores");
 const search = ref("");
-
-const toggleSidebar = () => {
-  uiStore.toggleSidebar();
-};
 
 const mostrarModal = ref(false);
 
@@ -58,23 +49,12 @@ const tabClass = (name) => [
 
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100">
-    <SidebarAdmin :open="sidebarOpen" @close="uiStore.setSidebarOpen(false)" />
-
-    <main :class="['transition-all duration-300 p-6', sidebarOpen ? 'md:ml-64' : 'ml-0']">
+    <main class="transition-all duration-300 p-6">
       <header class="mb-6">
-        <div class="flex items-center gap-4">
-          <button
-            @click="toggleSidebar"
-            class="p-2 rounded-lg border border-transparent bg-transparent hover:bg-slate-200 transition"
-          >
-            <i :class="sidebarOpen ? 'pi pi-times' : 'pi pi-bars'" class="text-xl"></i>
-          </button>
+        <div>
+          <h1 class="text-4xl font-bold text-slate-900">Profesores</h1>
 
-          <div>
-            <h1 class="text-4xl font-bold text-slate-900">Profesores</h1>
-
-            <p class="text-slate-500 mt-2">Gestión de profesores y asignaciones.</p>
-          </div>
+          <p class="text-slate-500 mt-2">Gestión de profesores y asignaciones.</p>
         </div>
       </header>
 

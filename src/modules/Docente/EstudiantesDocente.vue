@@ -1,15 +1,5 @@
 <script setup>
 import { ref, computed } from "vue";
-import { storeToRefs } from "pinia";
-import { useUiStore } from "@/stores/ui";
-import SidebarDocente from "./SidebarDocente.vue";
-
-const uiStore = useUiStore();
-const { sidebarOpen } = storeToRefs(uiStore);
-
-const toggleSidebar = () => {
-  uiStore.toggleSidebar();
-};
 
 const filtroGrado = ref("");
 const filtroSeccion = ref("");
@@ -67,29 +57,14 @@ const verEstudiante = (estudiante) => {
   selectedStudent.value = estudiante;
   showModal.value = true;
 };
-
-
 </script>
 
 <template>
   <div class="relative min-h-screen bg-gray-50 md:flex">
-    <SidebarDocente :open="sidebarOpen" @close="uiStore.setSidebarOpen(false)" />
-
-    <main
-      :class="[
-        'flex-1 min-w-0 transition-all duration-300',
-        sidebarOpen ? 'md:ml-64 ml-0' : 'ml-0',
-      ]"
-    >
+    <main class="flex-1 min-w-0 transition-all duration-300">
       <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
         <div class="px-6 py-4 flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            <button
-              @click="toggleSidebar"
-              class="p-2 rounded-lg bg-white hover:bg-gray-100 transition"
-            >
-              <i :class="['text-xl', sidebarOpen ? 'pi pi-times' : 'pi pi-bars']"></i>
-            </button>
+          <div>
             <h1 class="text-xl font-bold text-gray-800">Mis Estudiantes</h1>
           </div>
         </div>

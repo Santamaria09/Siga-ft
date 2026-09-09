@@ -1,15 +1,5 @@
 <script setup>
 import { ref } from "vue";
-import { storeToRefs } from "pinia";
-import { useUiStore } from "@/stores/ui";
-import SidebarCliente from "./SidebarCliente.vue";
-
-const uiStore = useUiStore();
-const { sidebarOpen } = storeToRefs(uiStore);
-
-const toggleSidebar = () => {
-  uiStore.toggleSidebar();
-};
 
 const padre = ref({
   nombre: "Elena Ruiz",
@@ -35,19 +25,10 @@ const hijos = ref([
 
 <template>
   <div class="min-h-screen bg-gray-50">
-    <SidebarCliente :open="sidebarOpen" @close="uiStore.setSidebarOpen(false)" />
-
-    <main :class="['transition-all duration-300', sidebarOpen ? 'md:ml-64' : 'ml-0']">
+    <main class="transition-all duration-300">
       <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
         <div class="px-6 py-4 flex items-center justify-between">
           <div class="flex items-center gap-4">
-            <button
-              @click="toggleSidebar"
-              class="p-2 rounded-lg border border-transparent bg-white text-gray-600"
-            >
-              <i :class="['text-xl', sidebarOpen ? 'pi pi-times' : 'pi pi-bars']"></i>
-            </button>
-
             <h1 class="text-xl font-bold text-gray-800">Mi Perfil</h1>
           </div>
         </div>
@@ -132,13 +113,6 @@ const hijos = ref([
           </div>
         </div>
       </div>
-
     </main>
-
-    <div
-      v-if="sidebarOpen"
-      @click="toggleSidebar"
-      class="md:hidden fixed inset-0 bg-black/30 z-30"
-    ></div>
   </div>
 </template>

@@ -1,19 +1,10 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { storeToRefs } from "pinia";
-import { useUiStore } from "@/stores/ui";
-import SidebarCliente from "./SidebarCliente.vue";
 
 const router = useRouter();
-const uiStore = useUiStore();
-const { sidebarOpen } = storeToRefs(uiStore);
 
 const modalTipoMatriculaOpen = ref(false);
-
-const toggleSidebar = () => {
-  uiStore.setSidebarOpen(!sidebarOpen.value);
-};
 
 const abrirTipoMatricula = () => {
   modalTipoMatriculaOpen.value = true;
@@ -51,18 +42,9 @@ const estudiantes = ref([
 
 <template>
   <div class="relative min-h-screen bg-gray-100 md:flex">
-    <SidebarCliente :open="sidebarOpen" @close="uiStore.setSidebarOpen(false)" />
-
-    <main :class="['flex-1 transition-all duration-300', sidebarOpen ? 'md:ml-64' : 'ml-0']">
+    <main class="flex-1 transition-all duration-300">
       <div class="mb-8 bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
         <div class="px-6 py-4 flex items-center gap-4">
-          <button
-            @click="toggleSidebar"
-            class="p-2 rounded-lg bg-white hover:bg-gray-100 transition text-gray-600"
-          >
-            <i :class="['text-xl transition', sidebarOpen ? 'pi pi-times' : 'pi pi-bars']"></i>
-          </button>
-
           <div>
             <h1 class="text-3xl font-bold text-gray-800">Solicitud de Matrícula</h1>
             <p class="text-gray-500 text-sm">Consulta el estado de las solicitudes de matrícula</p>
@@ -177,11 +159,5 @@ const estudiantes = ref([
         </div>
       </div>
     </div>
-
-    <div
-      v-if="sidebarOpen"
-      @click="toggleSidebar"
-      class="md:hidden fixed inset-0 bg-black/30 z-20"
-    ></div>
   </div>
 </template>

@@ -1,8 +1,5 @@
 <script setup>
 import { ref } from "vue";
-import { storeToRefs } from "pinia";
-import { useUiStore } from "@/stores/ui";
-import SidebarDocente from "@/modules/Docente/SidebarDocente.vue";
 import reportBoleta from "@/modules/Docente/reportes/Boleta.vue";
 import reportConducta from "@/modules/Docente/reportes/Conducta.vue";
 import reportDocente from "@/modules/Docente/reportes/Informe.vue";
@@ -11,9 +8,6 @@ import conductaPDF from "@/modules/Docente/reportes/conductaPDF.vue";
 import informePDF from "@/modules/Docente/reportes/informePDF.vue";
 import Rendimiento from "@/modules/Docente/reportes/Rendimiento.vue";
 import rendimientoPDF from "@/modules/Docente/reportes/rendimientoPDF.vue";
-
-const uiStore = useUiStore();
-const { sidebarOpen } = storeToRefs(uiStore);
 
 const mostrarBoleta = ref(false);
 const mostrarConducta = ref(false);
@@ -45,8 +39,6 @@ const abrirFormulario = (id) => {
 const cerrarFormulario = () => {
   reporteSeleccionado.value = null;
 };
-
-const toggleSidebar = () => uiStore.toggleSidebar();
 
 const reportesDisponibles = ref([
   {
@@ -82,19 +74,10 @@ const reportesDisponibles = ref([
 
 <template>
   <div class="relative min-h-screen bg-gray-50 md:flex">
-    <SidebarDocente :open="sidebarOpen" />
-
-    <main :class="['flex-1 transition-all duration-300', sidebarOpen ? 'md:ml-64 ml-0' : 'ml-0']">
+    <main class="flex-1 transition-all duration-300">
       <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
         <div class="px-6 py-4 flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            <button
-              @click="toggleSidebar"
-              class="p-2 rounded-lg border border-transparent bg-white hover:bg-gray-100 transition text-gray-600"
-            >
-              <i :class="['text-xl', sidebarOpen ? 'pi pi-times' : 'pi pi-bars']"></i>
-            </button>
-
+          <div>
             <h1 class="text-xl font-bold text-gray-800">Reportes</h1>
           </div>
         </div>
@@ -381,11 +364,5 @@ const reportesDisponibles = ref([
         </div>
       </div>
     </main>
-
-    <div
-      v-if="sidebarOpen"
-      @click="toggleSidebar"
-      class="md:hidden fixed inset-0 bg-black/30 z-35"
-    ></div>
   </div>
 </template>

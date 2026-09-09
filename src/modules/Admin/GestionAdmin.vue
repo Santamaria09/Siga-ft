@@ -1,43 +1,19 @@
 <script setup>
 import { ref } from "vue";
-import { storeToRefs } from "pinia";
-import { useUiStore } from "@/stores/ui";
-import SidebarAdmin from "./SidebarAdmin.vue";
 import SeccionesView from "@/views/admin/SeccionesView.vue";
 import GradosView from "@/views/admin/GradoView.vue";
 import MateriasView from "@/views/admin/MateriaView.vue";
 import EspecialidadesView from "@/views/admin/EspecialidadView.vue";
 
-const uiStore = useUiStore();
-const { sidebarOpen } = storeToRefs(uiStore);
-
 const catalogos = ref("");
-
-const toggleSidebar = () => {
-  uiStore.toggleSidebar();
-};
 </script>
 
 <template>
   <div class="relative min-h-screen bg-gray-50 md:flex">
-    <SidebarAdmin :open="sidebarOpen" @close="uiStore.setSidebarOpen(false)" />
-
-    <main
-      :class="[
-        'flex-1 min-w-0 transition-all duration-300',
-        sidebarOpen ? 'md:ml-64 ml-0' : 'ml-0',
-      ]"
-    >
+    <main class="flex-1 min-w-0 transition-all duration-300">
       <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
         <div class="px-6 py-2 flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            <button
-              @click="toggleSidebar"
-              class="p-2 rounded-lg border border-transparent bg-white hover:bg-gray-100 transition text-gray-600"
-            >
-              <i :class="['text-xl', sidebarOpen ? 'pi pi-times' : 'pi pi-bars']"></i>
-            </button>
-
+          <div>
             <h1 class="text-xl font-bold text-gray-800">Catálogos</h1>
           </div>
         </div>

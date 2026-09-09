@@ -1,167 +1,241 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import Login from '../views/Login.vue'
-import Register from '../views/Register.vue'
-import DashboardCliente from '../modules/Cliente/DashboardCliente.vue'
+import { createRouter, createWebHistory } from "vue-router";
+
+// Layouts
+import AdminLayout from "../layouts/AdminLayout.vue";
+import ClienteLayout from "../layouts/ClienteLayout.vue";
+
+// Vistas principales
+import HomeView from "../views/HomeView.vue";
+import Login from "../views/Login.vue";
+import Register from "../views/Register.vue";
+
+// Cliente
+import DashboardCliente from "../modules/Cliente/DashboardCliente.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+
   routes: [
+    // =========================================================
+    // PÚBLICAS
+    // =========================================================
+
     {
-      path: '/',
-      name: 'home',
+      path: "/",
+      name: "home",
       component: HomeView,
     },
+
     {
-      path: '/about',
-      name: 'about',
-      component: () => import('../views/AboutView.vue'),
-    },
-    {
-      path: '/login',
-      name: 'login',
+      path: "/login",
+      name: "login",
       component: Login,
     },
+
     {
-      path: '/register',
-      name: 'register',
+      path: "/register",
+      name: "register",
       component: Register,
     },
-    {
-      path: '/cliente/dashboard',
-      name: 'dashboard-cliente',
-      component: DashboardCliente,
-    },
-    {
-      path: '/cliente/perfil',
-      name: 'perfil-cliente',
-      component: () => import('../modules/Cliente/PerfilCliente.vue'),
-    },
-    {
-      path: '/cliente/registro',
-      name: 'registro-cliente',
-      component: () => import('../modules/Cliente/ListaCliente.vue'),
-    },
-    {
-      path: '/cliente/matricula',
-      name: 'matricula-cliente',
-      component: () => import('../modules/Cliente/GestionEstudiante.vue')
-
-    },
-    {
-      path: '/cliente/boleta',
-      name: 'boleta-cliente',
-      component: () => import('../modules/Cliente/BoletaCliente.vue'),
-    },
-    {
-      path: '/cliente/matriculas',
-      name: 'matriculas-cliente',
-      component: () => import('@/modules/Cliente/MatriculaEstudiante.vue'),
-    },
-    {
-      path: '/cliente/asignaturas',
-      name: 'asignaturas-cliente',
-      component: () => import('../modules/Cliente/AsignaturasCliente.vue'),
-    },
-    {
-      path: '/cliente/padres',
-      name: 'registro-padres',
-      component: () => import('../modules/Cliente/RegistroPadres.vue'),
-    },
-    {
-      path: '/cliente/avisos',
-      name: 'avisos-cliente',
-      component: () => import('../modules/Cliente/AvisosCliente.vue'),
-    },
-    // Rutas Docente
-    {
-      path: '/docente/dashboard',
-      name: 'dashboard-docente',
-      component: () => import('../modules/Docente/DashboardDocente.vue'),
-    },
-    {
-      path: '/docente/perfil',
-      name: 'perfil-docente',
-      component: () => import('../modules/Docente/PerfilDocente.vue'),
-    },
-    {
-      path: '/docente/asignaturas',
-      name: 'asignaturas-docente',
-      component: () => import('../modules/Docente/AsignaturasDocente.vue'),
-    },
 
     {
-      path: '/docente/notas',
-      name: 'notas-docente',
-      component: () => import('../modules/Docente/NotasDocente.vue'),
-    },
-    {
-      path: '/docente/estudiantes',
-      name: 'estudiantes-docente',
-      component: () => import('../modules/Docente/EstudiantesDocente.vue'),
-    },
-    {
-      path: '/docente/avisos',
-      name: 'avisos-docente',
-      component: () => import('../modules/Docente/AvisosDocente.vue'),
-    },
-    {
-      path: '/docente/conducta',
-      name: 'conducta-docente',
-      component: () => import('../modules/Docente/ConductaDocente.vue'),
-    },
-    {
-      path: '/docente/reportes',
-      name: 'reportes-docente',
-      component: () => import('@/views/docente/ReportesView.vue'),
-    },
-    {
-      path: '/docente/grados-secciones',
-      name: 'grados-secciones-docente',
-      component: () => import('../modules/Docente/GradosSeccionesDocente.vue'),
-    },
-    {
-      path:'/Admin/dashboard',
-      name:'dashboard-admin',
-      component: () => import('../modules/Admin/Dashboard.vue'),
-    },
-{
-      path:'/Admin/gestion-usuarios',
-      name:'gestion-usuarios-admin',
-      component: () => import('../modules/Admin/Tables/TablaUsuarios.vue'),
-    },
-    {
-      path:'/Admin/estudiantes',
-      name:'estudiantes-admin',
-      component: () => import('@/views/admin/EstudianteView.vue'),
-    },
-    {
-      path:'/Admin/matricula',
-      name:'matricula-admin',
-      component: () => import('@/views/admin/MatriculasView.vue'),
-    },
-    {
-      path:'/Admin/profesores',
-      name:'profesores-admin',
-      component: () => import('../modules/Admin/Tables/TablaProfesor.vue'),
-    },
-    {
-      path:'/Admin/asignaciones',
-      name:'asignaciones-admin',
-      component:()=> import('@/views/admin/AsignacionView.vue')
-    },
-    {
-      path:'/Admin/reporte',
-      name:'reporte-admin',
-      component: () => import('@/views/admin/ReportesView.vue'),
-    },
-    {
-      path:'/Admin/catalogos',
-      name:'catalogos-admin',
-      component: () => import('../modules/Admin/GestionAdmin.vue'),
+      path: "/about",
+      name: "about",
+      component: () => import("../views/AboutView.vue"),
     },
 
+    // =========================================================
+    // CLIENTE
+    // =========================================================
+
+    {
+      path: "/cliente",
+      component: ClienteLayout,
+      children: [
+        {
+          path: "dashboard",
+          name: "dashboard-cliente",
+          component: DashboardCliente,
+        },
+
+        {
+          path: "perfil",
+          name: "perfil-cliente",
+          component: () => import("../modules/Cliente/PerfilCliente.vue"),
+        },
+
+        {
+          path: "registro",
+          name: "registro-cliente",
+          component: () => import("../modules/Cliente/ListaCliente.vue"),
+        },
+
+        {
+          path: "matricula",
+          name: "matricula-cliente",
+          component: () => import("../modules/Cliente/GestionEstudiante.vue"),
+        },
+
+        {
+          path: "matriculas",
+          name: "matriculas-cliente",
+          component: () => import("../modules/Cliente/MatriculaEstudiante.vue"),
+        },
+
+        {
+          path: "boleta",
+          name: "boleta-cliente",
+          component: () => import("../modules/Cliente/BoletaCliente.vue"),
+        },
+
+        {
+          path: "asignaturas",
+          name: "asignaturas-cliente",
+          component: () => import("../modules/Cliente/AsignaturasCliente.vue"),
+        },
+
+        {
+          path: "padres",
+          name: "registro-padres",
+          component: () => import("../modules/Cliente/RegistroPadres.vue"),
+        },
+
+        {
+          path: "avisos",
+          name: "avisos-cliente",
+          component: () => import("../modules/Cliente/AvisosCliente.vue"),
+        },
+      ],
+    },
+
+    // =========================================================
+    // DOCENTE
+    // =========================================================
+
+    {
+      path: "/docente",
+      component: () => import("../layouts/DocenteLayout.vue"),
+      children: [
+        {
+          path: "dashboard",
+          name: "dashboard-docente",
+          component: () => import("../modules/Docente/DashboardDocente.vue"),
+        },
+
+        {
+          path: "perfil",
+          name: "perfil-docente",
+          component: () => import("../modules/Docente/PerfilDocente.vue"),
+        },
+
+        {
+          path: "asignaturas",
+          name: "asignaturas-docente",
+          component: () => import("../modules/Docente/AsignaturasDocente.vue"),
+        },
+
+        {
+          path: "notas",
+          name: "notas-docente",
+          component: () => import("../modules/Docente/NotasDocente.vue"),
+        },
+
+        {
+          path: "estudiantes",
+          name: "estudiantes-docente",
+          component: () => import("../modules/Docente/EstudiantesDocente.vue"),
+        },
+
+        {
+          path: "avisos",
+          name: "avisos-docente",
+          component: () => import("../modules/Docente/AvisosDocente.vue"),
+        },
+
+        {
+          path: "conducta",
+          name: "conducta-docente",
+          component: () => import("../modules/Docente/ConductaDocente.vue"),
+        },
+
+        {
+          path: "reportes",
+          name: "reportes-docente",
+          component: () => import("../views/docente/ReportesView.vue"),
+        },
+
+        {
+          path: "grados-secciones",
+          name: "grados-secciones-docente",
+          component: () => import("../modules/Docente/GradosSeccionesDocente.vue"),
+        },
+      ],
+    },
+
+    // =========================================================
+    // ADMINISTRADOR
+    // =========================================================
+
+    {
+      path: "/admin",
+      component: AdminLayout,
+
+      children: [
+        {
+          path: "dashboard",
+          name: "dashboard-admin",
+          component: () => import("../modules/Admin/Dashboard.vue"),
+        },
+
+        {
+          path: "gestion-usuarios",
+          name: "gestion-usuarios-admin",
+          component: () => import("../modules/Admin/Tables/TablaUsuarios.vue"),
+        },
+
+        {
+          path: "estudiantes",
+          name: "estudiantes-admin",
+          component: () => import("../views/admin/EstudianteView.vue"),
+        },
+
+        {
+          path: "matricula",
+          name: "matricula-admin",
+          component: () => import("../views/admin/MatriculasView.vue"),
+        },
+
+        {
+          path: "profesores",
+          name: "profesores-admin",
+          component: () => import("../modules/Admin/Tables/TablaProfesor.vue"),
+        },
+
+        {
+          path: "asignaciones",
+          name: "asignaciones-admin",
+          component: () => import("../views/admin/AsignacionView.vue"),
+        },
+
+        {
+          path: "reporte",
+          name: "reporte-admin",
+          component: () => import("../views/admin/ReportesView.vue"),
+        },
+        {
+          path: "constancia",
+          name: "constancia-admin",
+          component: () => import("../modules/Admin/Forms/constancias/egresadoPDF.vue"),
+        },
+
+        {
+          path: "catalogos",
+          name: "catalogos-admin",
+          component: () => import("../modules/Admin/GestionAdmin.vue"),
+        },
+      ],
+    },
   ],
-})
+});
 
-export default router
+export default router;
