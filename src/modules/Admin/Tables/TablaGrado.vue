@@ -1,4 +1,5 @@
 <script setup>
+import DataTable from "primevue/datatable";
 import { ref } from "vue";
 
 const Grados = ref([
@@ -11,6 +12,9 @@ const Grados = ref([
 </script>
 
 <template>
+  <DataTable>
+    hola
+  </DataTable>
   <div class="w-full p-4 md:p-6">
 
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">

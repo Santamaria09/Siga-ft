@@ -261,7 +261,7 @@ import { ref } from 'vue';
 import academicoPDF from './academicoPDF.vue';
 import conductaPDF from './conductaPDF.vue';
 import docentePDF from './docentePDF.vue';
-import institucionalPDF from './institucionalPDF.vue';
+import institucionalPDF from './InstitucionalPDF.vue';
 
 const mostrarAcademico = ref(false)
 const mostrarConducta = ref(false)

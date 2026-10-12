@@ -146,17 +146,6 @@ const generarReporte = () => {
 <template>
   <div class="w-full">
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-      <!-- HEADER -->
-      <div class="bg-gradient-to-r from-blue-600 to-indigo-800 p-5 flex items-center gap-4">
-        <div class="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center">
-          <i class="pi pi-users text-white text-2xl"></i>
-        </div>
-
-        <div>
-          <h2 class="text-2xl font-bold text-white">REPORTE DE RENDIMIENTO ACADEMICO</h2>
-          <p class="text-blue-100">Genere boletas academicas.</p>
-        </div>
-      </div>
 
       <form @submit.prevent="generarReporte" class="p-8">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

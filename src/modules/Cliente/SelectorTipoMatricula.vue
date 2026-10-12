@@ -35,9 +35,7 @@ const seleccionarTipoMatricula = (tipo) => {
           <i class="pi pi-user-plus text-3xl text-blue-600"></i>
           <div>
             <h3 class="font-bold text-gray-800 text-lg">Nuevo Ingreso</h3>
-            <p class="text-sm text-gray-500 mt-0.5">
-              Estudiantes que ingresan por primera vez.
-            </p>
+            <p class="text-sm text-gray-500 mt-0.5">Estudiantes que ingresan por primera vez.</p>
           </div>
         </div>
       </button>
@@ -50,9 +48,7 @@ const seleccionarTipoMatricula = (tipo) => {
           <i class="pi pi-sync text-3xl text-violet-600"></i>
           <div>
             <h3 class="font-bold text-gray-800 text-lg">Antiguo Ingreso</h3>
-            <p class="text-sm text-gray-500 mt-0.5">
-              Estudiantes que continúan en la institución.
-            </p>
+            <p class="text-sm text-gray-500 mt-0.5">Estudiantes que continúan en la institución.</p>
           </div>
         </div>
       </button>
@@ -65,13 +61,7 @@ const seleccionarTipoMatricula = (tipo) => {
   animation: fadeIn 0.2s ease-out;
 }
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>

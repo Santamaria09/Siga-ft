@@ -10,7 +10,7 @@ import Login from "../views/Login.vue";
 import Register from "../views/Register.vue";
 
 // Cliente
-import DashboardCliente from "../modules/Cliente/DashboardCliente.vue";
+import DashboardCliente from "../views/cliente/DashboardCliente.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -61,49 +61,37 @@ const router = createRouter({
         {
           path: "perfil",
           name: "perfil-cliente",
-          component: () => import("../modules/Cliente/PerfilCliente.vue"),
+          component: () => import("../views/cliente/PerfilCliente.vue"),
         },
 
         {
           path: "registro",
           name: "registro-cliente",
-          component: () => import("../modules/Cliente/ListaCliente.vue"),
+          component: () => import("../views/cliente/ListaClienteView.vue"),
         },
 
         {
           path: "matricula",
           name: "matricula-cliente",
-          component: () => import("../modules/Cliente/GestionEstudiante.vue"),
+          component: () => import("../views/cliente/GestionEstudiante.vue"),
         },
 
         {
           path: "matriculas",
           name: "matriculas-cliente",
-          component: () => import("../modules/Cliente/MatriculaEstudiante.vue"),
+          component: () => import("../views/cliente/MatriculaView.vue"),
         },
 
         {
           path: "boleta",
           name: "boleta-cliente",
-          component: () => import("../modules/Cliente/BoletaCliente.vue"),
+          component: () => import("../views/cliente/BoletaCliente.vue"),
         },
 
         {
           path: "asignaturas",
           name: "asignaturas-cliente",
-          component: () => import("../modules/Cliente/AsignaturasCliente.vue"),
-        },
-
-        {
-          path: "padres",
-          name: "registro-padres",
-          component: () => import("../modules/Cliente/RegistroPadres.vue"),
-        },
-
-        {
-          path: "avisos",
-          name: "avisos-cliente",
-          component: () => import("../modules/Cliente/AvisosCliente.vue"),
+          component: () => import("../views/cliente/AsignaturasCliente.vue"),
         },
       ],
     },
@@ -144,12 +132,6 @@ const router = createRouter({
           path: "estudiantes",
           name: "estudiantes-docente",
           component: () => import("../modules/Docente/EstudiantesDocente.vue"),
-        },
-
-        {
-          path: "avisos",
-          name: "avisos-docente",
-          component: () => import("../modules/Docente/AvisosDocente.vue"),
         },
 
         {
@@ -208,7 +190,7 @@ const router = createRouter({
         {
           path: "profesores",
           name: "profesores-admin",
-          component: () => import("../modules/Admin/Tables/TablaProfesor.vue"),
+          component: () => import("../views/admin/ProfesorView.vue"),
         },
 
         {

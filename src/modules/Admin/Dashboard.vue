@@ -7,13 +7,6 @@ const adminName = ref("Ing. Juan Pérez");
 <template>
   <div class="relative min-h-screen bg-gray-50 md:flex">
     <main class="flex-1 transition-all duration-300 bg-slate-100">
-      <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
-        <div class="px-6 py-3 flex items-center justify-between">
-          <div>
-            <h2 class="font-semibold text-gray-800">Panel Administrativo</h2>
-          </div>
-        </div>
-      </header>
 
       <div class="p-6">
         <!-- Título -->
