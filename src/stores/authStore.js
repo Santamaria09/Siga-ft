@@ -1,33 +1,73 @@
-import { defineStore } from 'pinia'
-import api from '@/services/api'
-import router from '@/router'
+import { defineStore } from 'pinia';
+import api from '@/services/api'; // Importación ajustada a la carpeta services
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    validacion: null, 
-    duiActual: null,
-    esNuevoUsuario: false 
+    user: null,
+    token: null,
   }),
-
+  
   getters: {
-    isVerified: (state) => !!state.validacion
+    isAuthenticated: (state) => !!state.token,
+    userRole: (state) => state.user?.roles?.[0]?.name || 'CLIENTE',
   },
 
   actions: {
-    async validarDui(payload) {
-const { data } = await api.post('/registrado', payload)
-      this.validacion = data.registro 
-      this.duiActual = payload.dui
-      this.esNuevoUsuario = data.esNuevo
+    async login(email, password) {
+      const response = await api.post('/auth/login', {
+        email,
+        password
+      });
 
-      router.push('/cliente/dashboard')
+      this.token = response.data.access_token;
+      this.user = response.data.user;
     },
 
-    limpiarValidacion() {
-      this.validacion = null
-      this.duiActual = null
-      this.esNuevoUsuario = false
-      router.push('/register') 
+    // MÉTODO NUEVO PARA EL REGISTRO
+    async register(userData) {
+      const response = await api.post('/auth/register', userData);
+      
+      // Laravel nos devuelve un token y usuario igual que en el login. 
+      // Al asignarlos, Pinia persist los guardará automáticamente.
+      this.token = response.data.access_token;
+      this.user = response.data.user;
+      
+      return response.data;
+    },
+
+    async validarDui(payload) {
+      const response = await api.post('/auth/validar-dui', payload);
+      return response.data;
+    },
+
+    async fetchUser() {
+      if (!this.token) return;
+      try {
+        const response = await api.get('/auth/me');
+        this.user = response.data;
+      } catch (error) {
+        this.logoutLocally();
+      }
+    },
+
+    async logout() {
+      try {
+        if (this.token) {
+          await api.post('/auth/logout');
+        }
+      } catch (error) {
+        console.error("Error al cerrar sesión en el servidor", error);
+      } finally {
+        this.logoutLocally();
+      }
+    },
+
+    logoutLocally() {
+      this.user = null;
+      this.token = null;
+      window.location.href = '/login';
     }
-  }
-})
+  },
+  
+  persist: true, 
+});

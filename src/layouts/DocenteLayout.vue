@@ -3,7 +3,7 @@ import { ref, onMounted, onUnmounted, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import Navbar from "./Navbar.vue";
-import SidebarDocente from "../modules/Docente/SidebarDocente.vue";
+import SidebarDocente from "./SidebarDocente.vue/index.js";
 
 const sidebarOpen = ref(false);
 const route = useRoute();

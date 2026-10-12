@@ -75,13 +75,6 @@ const reportesDisponibles = ref([
 <template>
   <div class="relative min-h-screen bg-gray-50 md:flex">
     <main class="flex-1 transition-all duration-300">
-      <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
-        <div class="px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 class="text-xl font-bold text-gray-800">Reportes</h1>
-          </div>
-        </div>
-      </header>
 
       <div class="bg-white border-b border-gray-200">
         <div class="flex">

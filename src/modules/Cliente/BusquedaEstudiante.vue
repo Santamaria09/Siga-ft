@@ -4,12 +4,10 @@ import { storeToRefs } from "pinia";
 import { useMatriculaStore } from "@/stores/matricula";
 
 const matriculaStore = useMatriculaStore();
-// 1. Extraemos la variable correcta del store
 const { estudiantesBuscados, cargando } = storeToRefs(matriculaStore);
 
 const nieBusqueda = ref("");
 
-// 2. Simplificamos la función para que use el Backend/Servicio
 const buscarEstudiante = async () => {
   const termino = nieBusqueda.value.trim();
   
@@ -18,7 +16,6 @@ const buscarEstudiante = async () => {
     return;
   }
   
-  // Ejecutamos la acción del store
   await matriculaStore.buscarEstudiante(termino);
 };
 
@@ -29,7 +26,6 @@ const seleccionarEstudiante = (estudiante) => {
 const volverASeleccionTipo = () => {
   matriculaStore.tipoMatricula = "";
   matriculaStore.pasoAntiguo = "busqueda";
-  // Limpiar la búsqueda al salir
   estudiantesBuscados.value = [];
   nieBusqueda.value = "";
 };
@@ -71,7 +67,6 @@ const hasBusqueda = computed(() => nieBusqueda.value.trim().length > 0);
       </button>
     </div>
 
-    <!-- 3. Iteramos sobre la variable global del store en lugar de la local -->
     <div v-if="estudiantesBuscados.length > 0" class="space-y-3">
       <div
         v-for="est in estudiantesBuscados"
@@ -79,9 +74,7 @@ const hasBusqueda = computed(() => nieBusqueda.value.trim().length > 0);
         @click="seleccionarEstudiante(est)"
         class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition flex items-center gap-4"
       >
-        <div
-          class="w-14 h-14 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center overflow-hidden"
-        >
+        <div class="w-14 h-14 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center overflow-hidden">
           <img v-if="est.foto" :src="est.foto" class="w-full h-full object-cover" />
           <i v-else class="pi pi-user text-xl text-gray-400"></i>
         </div>
@@ -96,10 +89,7 @@ const hasBusqueda = computed(() => nieBusqueda.value.trim().length > 0);
       </div>
     </div>
 
-    <div
-      v-else-if="hasBusqueda && !estudiantesBuscados.length && !cargando"
-      class="text-center py-8 text-gray-400"
-    >
+    <div v-else-if="hasBusqueda && !estudiantesBuscados.length && !cargando" class="text-center py-8 text-gray-400">
       <i class="pi pi-search text-3xl mb-2"></i>
       <p>No se encontraron estudiantes con el NIE ingresado.</p>
     </div>

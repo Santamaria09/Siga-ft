@@ -43,14 +43,6 @@ const handleNavClick = () => {
         open ? 'w-64 translate-x-0' : 'w-0 -translate-x-full overflow-hidden',
       ]"
     >
-      <!-- Header -->
-      <div class="p-6 border-b border-gray-200">
-        <div class="bg-blue-500 flex items-center gap-2 drop-shadow p-2 rounded">
-          <i class="pi pi-graduation-cap text-white"></i>
-
-          <h3 class="text-xs text-white">Complejo Educativo Hacienda Colima</h3>
-        </div>
-      </div>
 
       <!-- Navegación -->
       <nav class="mt-4 flex flex-col text-sm pb-24">
@@ -87,13 +79,6 @@ const handleNavClick = () => {
             <i class="pi pi-users text-blue-500"></i>
           </div>
           Mis Estudiantes
-        </router-link>
-
-        <router-link to="/docente/avisos" class="menu-item" @click="handleNavClick">
-          <div class="bg-white drop-shadow p-2 rounded-full">
-            <i class="pi pi-book text-blue-500"></i>
-          </div>
-          Avisos
         </router-link>
 
         <router-link to="/docente/conducta" class="menu-item" @click="handleNavClick">

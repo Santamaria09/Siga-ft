@@ -1,6 +1,7 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
-import { matriculaService } from "@/services/matriculaService";
+import api from '@/services/api'; // Importamos tu instancia de Axios configurada
+import { matriculaService } from "@/services/matriculaService"; // Mantenemos este por si tienes otras lógicas separadas
 
 export const useMatriculaStore = defineStore("matricula", () => {
   // --- ESTADOS DE CONTROL Y NAVEGACIÓN ---
@@ -47,13 +48,22 @@ export const useMatriculaStore = defineStore("matricula", () => {
   const turnoSelected = ref("");
   const repiteGrado = ref("");
 
-  // --- CATÁLOGOS ---
-  const parentescos = ref([]);
+  // --- CATÁLOGOS (Conectados a Laravel) ---
+  const parentescos = ref([
+      { id: 'Padre', nombre: 'Padre' },
+      { id: 'Madre', nombre: 'Madre' },
+      { id: 'Tío(a)', nombre: 'Tío(a)' },
+      { id: 'Otro', nombre: 'Otro' }
+  ]);
   const grados = ref([]);
-  const turnos = ref([]);
-  const enfermedades = ref([]);
-  const discapacidades = ref([]);
+  const especialidades = ref([]); // Agregado para EspecialidadController
+  const discapacidades = ref([]); // Agregado para DiscapacidadController
+  
+  // Estos los dejamos fijos temporalmente hasta que crees sus controladores en Laravel
+  const turnos = ref([{ id: 'matutino', nombre: 'Matutino' }, { id: 'vespertino', nombre: 'Vespertino' }]);
+  const enfermedades = ref([{ id: 1, nombre: 'Ninguna' }, { id: 2, nombre: 'Asma' }]);
   const medicamentos = ref([]);
+  
   const estudiantesBuscados = ref([]);
 
   // --- COMPUTADOS ---
@@ -72,6 +82,7 @@ export const useMatriculaStore = defineStore("matricula", () => {
     return lista;
   });
 
+  // Modificado para usar el array real de especialidades
   const especialidadSelected = computed(() => {
     const gradoEncontrado = grados.value.find((g) => g.id === gradoSelected.value);
     if (!gradoEncontrado) return "";
@@ -82,17 +93,24 @@ export const useMatriculaStore = defineStore("matricula", () => {
     tipoMatricula.value === "antiguo" ? "Antiguo Ingreso" : "Nuevo Ingreso"
   );
 
-  // --- PETICIONES MEDIANTE EL SERVICIO ---
+  // --- PETICIONES MEDIANTE EL SERVICIO API ---
 
-  // 1. Cargar catálogos desde el Servicio
+  // 1. Cargar catálogos desde los Controladores de Laravel
   const cargarCatalogos = async () => {
     try {
       cargando.value = true;
-      const response = await matriculaService.obtenerCatalogos();
+      // Consultamos múltiples endpoints en paralelo para mayor velocidad
+      const [resGrados, resEspecialidades, resDiscapacidades] = await Promise.all([
+        api.get('/grados'),
+        api.get('/especialidades'),
+        api.get('/discapacidades')
+      ]);
 
-      grados.value = response.data.grados;
-      turnos.value = response.data.turnos;
-      parentescos.value = response.data.parentescos;
+      // Mapeamos los datos según la respuesta de Laravel
+      grados.value = resGrados.data.grados || [];
+      especialidades.value = resEspecialidades.data.especialidades || [];
+      discapacidades.value = resDiscapacidades.data.discapacidades || [];
+      
     } catch (error) {
       console.error("Error al obtener catálogos iniciales:", error);
     } finally {
@@ -100,14 +118,24 @@ export const useMatriculaStore = defineStore("matricula", () => {
     }
   };
 
-  // 2. Buscar estudiante antiguo por NIE o Nombre
+  // 2. Buscar estudiante antiguo por NIE en MatriculaController
   const buscarEstudiante = async (termino) => {
     try {
       cargando.value = true;
-      const { data } = await matriculaService.buscarEstudiante(termino);
-      estudiantesBuscados.value = data;
+      estudiantesBuscados.value = [];
+      
+      const response = await api.post('/matriculas/buscar-nie', { nie: termino });
+      
+      if (response.data.estudiante) {
+        estudiantesBuscados.value = [response.data.estudiante];
+      }
     } catch (error) {
-      console.error("Error al buscar estudiante:", error);
+      if (error.response && error.response.status === 404) {
+        // Si Laravel retorna 404, dejamos el arreglo vacío para mostrar "No encontrado"
+        estudiantesBuscados.value = [];
+      } else {
+        console.error("Error al buscar estudiante:", error);
+      }
     } finally {
       cargando.value = false;
     }
@@ -121,13 +149,11 @@ export const useMatriculaStore = defineStore("matricula", () => {
     try {
       const formData = new FormData();
 
-      // Datos de control
       formData.append("tipo_matricula", tipoMatricula.value);
       formData.append("grado_id", gradoSelected.value);
       formData.append("turno_id", turnoSelected.value);
       formData.append("repite_grado", repiteGrado.value);
 
-      // Datos de estudiante
       formData.append("estudiante_nombres", estudiante.value.nombres);
       formData.append("estudiante_nie", estudiante.value.NIE);
       
@@ -135,7 +161,6 @@ export const useMatriculaStore = defineStore("matricula", () => {
         formData.append("estudiante_id", estudianteSeleccionado.value.id);
       }
 
-      // Archivos adjuntos
       if (fotoEstudiante.value) {
         formData.append("foto", fotoEstudiante.value);
       }
@@ -143,7 +168,6 @@ export const useMatriculaStore = defineStore("matricula", () => {
         formData.append("certificado", certificadoEstudiante.value);
       }
 
-      // Datos de encargado
       const datosEncargado = obtenerDatosEncargadoEnvio();
       formData.append("encargado_nuevo", datosEncargado.esNuevo);
       if (datosEncargado.esNuevo) {
@@ -155,12 +179,10 @@ export const useMatriculaStore = defineStore("matricula", () => {
         formData.append("encargado_id", datosEncargado.id);
       }
 
-      // Arrays de salud
       formData.append("enfermedades", JSON.stringify(salud.value.enfermedades));
       formData.append("discapacidades", JSON.stringify(salud.value.discapacidades));
       formData.append("medicamentos", JSON.stringify(salud.value.medicamentos));
 
-      // Envío a través del servicio
       const response = await matriculaService.enviarMatricula(formData);
 
       console.log("Matrícula guardada exitosamente:", response.data);
@@ -184,6 +206,10 @@ export const useMatriculaStore = defineStore("matricula", () => {
     pestañaActiva.value = "dato";
     pasoAntiguo.value = "busqueda";
     pasoNuevo.value = "busqueda";
+    
+    // Al seleccionar el tipo, cargamos los catálogos automáticamente
+    cargarCatalogos();
+    
     if (tipo === "nuevo") {
       estudiante.value = { nombres: "", NIE: "" };
       fotoPreview.value = "";
@@ -208,7 +234,7 @@ export const useMatriculaStore = defineStore("matricula", () => {
     
     estudiante.value = {
       nombres: clon.nombres || "",
-      NIE: clon.NIE || "",
+      NIE: clon.nie || "", // Cambiado a minúscula para coincidir con el backend
     };
 
     pasoAntiguo.value = "formulario";
@@ -236,7 +262,7 @@ export const useMatriculaStore = defineStore("matricula", () => {
     pasoAntiguo.value = "busqueda";
     pasoNuevo.value = "busqueda";
     estudianteSeleccionado.value = null;
-    estudiantesBuscados.value = []; // <--- CORRECCIÓN: Limpia la lista de búsqueda
+    estudiantesBuscados.value = []; 
     estudiante.value = { nombres: "", NIE: "" };
     fotoEstudiante.value = null;
     fotoPreview.value = "";
@@ -330,6 +356,7 @@ export const useMatriculaStore = defineStore("matricula", () => {
     repiteGrado,
     parentescos,
     grados,
+    especialidades,
     turnos,
     enfermedades,
     discapacidades,

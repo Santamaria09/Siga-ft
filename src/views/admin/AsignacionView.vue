@@ -16,15 +16,6 @@ const cerrarAsignacion = () => {
 <template>
   <div class="relative min-h-screen bg-slate-100 md:flex">
     <main class="flex-1 transition-all duration-300">
-      <header class="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
-        <div class="px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 class="text-xl font-bold text-slate-800">Asignaciones Académicas</h1>
-
-            <p class="text-sm text-slate-500">Gestión de asignaciones de docentes</p>
-          </div>
-        </div>
-      </header>
 
       <div class="p-6">
         <div v-if="!mostrarAsignacion">

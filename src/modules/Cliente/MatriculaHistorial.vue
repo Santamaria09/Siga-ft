@@ -66,6 +66,7 @@ const abrirFormulario = () => {
 
   cerrarVerMatricula();
 };
+
 const volver = () => {
   emit("close");
 };

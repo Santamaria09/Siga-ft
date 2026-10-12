@@ -35,14 +35,7 @@ const rechazarMatricula = (datos) => {
 <template>
   <div class="relative min-h-screen bg-gray-50 md:flex">
     <main class="flex-1 min-w-0 transition-all duration-300">
-      <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
-        <div class="px-6 py-2 flex items-center justify-between">
-          <div>
-            <h1 class="text-xl font-bold text-gray-800">Matrículas</h1>
-          </div>
-        </div>
-      </header>
-
+      
       <template v-if="vistaActual === 'tabla'">
         <div class="grid grid-cols-3 gap-4 p-8">
           <button

@@ -8,30 +8,7 @@ const hasNewNotices = ref(true);
 <template>
   <div class="relative min-h-screen bg-gray-50 md:flex">
     <main class="flex-1 min-w-0 transition-all duration-300">
-      <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
-        <div class="px-6 py-2 flex items-center justify-between">
-          <div>
-            <h1 class="text-xl font-bold text-gray-800">Portal del Profesor</h1>
-          </div>
 
-          <div class="flex items-center gap-4">
-            <div class="relative">
-              <button
-                class="p-2 border border-transparent bg-transparent rounded-lg hover:bg-gray-100 transition text-gray-600"
-              >
-                <i class="pi pi-bell text-xl"></i>
-
-                <span
-                  v-if="hasNewNotices"
-                  class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"
-                ></span>
-              </button>
-            </div>
-
-            <div class="flex items-center gap-3 pl-4 border-l border-gray-200"></div>
-          </div>
-        </div>
-      </header>
 
       <div class="p-4 lg:p-6 space-y-4">
         <section class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">

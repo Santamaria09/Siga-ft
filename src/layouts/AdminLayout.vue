@@ -4,7 +4,7 @@ import { ref, onMounted, onUnmounted, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import Navbar from "./Navbar.vue";
-import SidebarAdmin from "../modules/Admin/SidebarAdmin.vue";
+import SidebarAdmin from "./SidebarAdmin.vue";
 
 const sidebarOpen = ref(false);
 const route = useRoute();
